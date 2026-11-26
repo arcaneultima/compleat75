@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="6">
+<meta name="c75-build" content="7">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -6379,9 +6379,9 @@ PWA.init();
 // ---------- LEADERBOARD: everyone's Field Operations standing this season, shared across Android and the web app ----------
 // Scores live in a small Supabase table. Each device has a random id and secret; the database only lets the device that
 // created a row change it. Points: (rank-1)*3 + intel below Rank 100, then 297 + OMEGA score. Ties go to whoever got there first.
-const LB={url:'',key:'',busy:0,last:0,timer:0,
+const LB={url:'https://jvcjcmzdeslvsiwvnhmw.supabase.co',key:'sb_publishable_jItbAbY54nY2CwTA7oylSA_oKajVpzc',busy:0,last:0,timer:0,
  on(){return!!(this.url&&this.key)&&typeof fetch==='function'},
- hdr(){return{apikey:this.key,Authorization:'Bearer '+this.key,'Content-Type':'application/json'}},
+ hdr(){const h={apikey:this.key,'Content-Type':'application/json'};if(!this.key.startsWith('sb_'))h.Authorization='Bearer '+this.key;return h},
  me(){const d=PROF.d;if(!d.lb||!d.lb.id){const h=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return[...a].map(x=>x.toString(16).padStart(2,'0')).join('')},x=h(16);
    d.lb={id:`${x.slice(0,8)}-${x.slice(8,12)}-4${x.slice(13,16)}-a${x.slice(17,20)}-${x.slice(20,32)}`,sec:h(24)};PROF.save()}return d.lb},
  plat(){return window.C75?'android':(typeof PWA!=='undefined'&&PWA.ios)?'iphone':'web'},
@@ -6452,6 +6452,63 @@ setTimeout(()=>LB.push(),5000);
 .lb-name{position:fixed;inset:0;z-index:9500;background:rgba(5,4,3,.82);display:flex;align-items:center;justify-content:center;padding:20px}
 .lb-nb{width:min(380px,92vw);background:#14120d;border:1px solid #b08a46;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}.lb-nb b{font:700 16px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-nb small{color:#a89c7c}
 .lb-nb input{font:700 20px var(--disp);letter-spacing:.12em;text-transform:uppercase;padding:10px 12px;border-radius:8px;border:1px solid #4b5034;background:#0b0a08;color:#efe5cc;user-select:text;-webkit-user-select:text}`;document.head.appendChild(st)}
+// ---------- PATCH NOTES: what changed in each build. Add an entry at the top with every release. ----------
+// After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
+// and in Settings.
+const CLOG=[
+ {b:7,d:'2026-11-26',t:'Leaderboard',i:[
+  ['NEW','Leaderboard in Field Operations: see where everyone stands this season, on Android and iPhone.'],
+  ['NEW','Tap a player on the leaderboard to see their record, story progress and most played directives.'],
+  ['NEW','Patch notes like these. They open after each update, and you can find them on the home screen or in Settings.']]},
+ {b:6,d:'2026-11-26',t:'Read before you pick',i:[
+  ['NEW','Hold any card for a moment to read it while you pick cards to discard or target. A quick tap still picks.'],
+  ['NEW','The enlarged card has a Pick button so you can choose it from there.']]},
+ {b:5,d:'2026-11-26',t:'iPhone web app',i:[
+  ['NEW','Compleat runs on iPhone: open it in Safari and use Add to Home Screen. It updates itself.'],
+  ['CHANGE','Collin shows up a bit more often in Field Operations.'],
+  ['FIX','Removed a leftover Settings button from the first title screen.'],
+  ['FIX','The board no longer flashes when you go from the title into the apartment.']]},
+ {b:4,d:'2026-11-26',t:'Collin',i:[
+  ['NEW','Collin, the trickster, can turn up in Field Operations. Every match with him runs on one of his rules.']]},
+ {b:3,d:'2026-11-26',t:'Compleat',i:[
+  ['CHANGE','The game is now called Compleat, and compile reads compleat everywhere.'],
+  ['FIX','Header and card preview fixes.']]},
+ {b:2,d:'2026-11-26',t:'Cleaner cards',i:[
+  ['FIX','Directive headers sit above the cards, labels no longer get cut off, and the key chip is cleaner.']]}];
+const NOTES={
+ cur(){const m=+((document.querySelector('meta[name="c75-build"]')||{}).content||0);let u=0;try{u=window.C75?+C75.build()||0:0}catch(e){}return Math.max(m,u)||CLOG[0].b},
+ day(s){const d=new Date(s+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}).toUpperCase()},
+ html(list){return list.map(e=>`<div class="cl-e"><div class="cl-h"><b>BUILD ${e.b}</b><span>${esc(e.t)}</span><small>${this.day(e.d)}</small></div>
+  <ul>${e.i.map(([k,x])=>`<li><i class="cl-${k.toLowerCase()}">${k}</i><span>${esc(x)}</span></li>`).join('')}</ul></div>`).join('')},
+ open(from,isNew){const cur=this.cur(),all=CLOG.filter(e=>e.b<=cur),fresh=all.filter(e=>e.b>from);const list=isNew&&fresh.length?fresh:all;
+  const o=document.createElement('div');o.className='cl-ov';o.innerHTML=`<div class="cl-p"><small>${isNew?'UPDATED TO BUILD '+cur:'PATCH NOTES'}</small><b>${isNew?"WHAT'S NEW":'WHAT CHANGED'}</b>
+   <div class="cl-l">${this.html(list)}</div>${isNew&&list.length<all.length?'<button class="lnk cl-all">SEE ALL PATCH NOTES ›</button>':''}<button class="big-btn wide sm cl-ok">GOT IT</button></div>`;
+  (document.getElementById('app')||document.body).appendChild(o);o.querySelector('.cl-ok').onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}o.remove()};
+  const a=o.querySelector('.cl-all');if(a)a.onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}o.remove();this.open(0,false)};
+  o.onclick=e=>{if(e.target===o)o.remove()}},
+ // first time a build runs: show what's new since the last build this player saw (nothing on a brand new save)
+ check(){const d=PROF.d,cur=this.cur();if(d.seenB==null){const fresh=!(d.stats&&d.stats.games)&&!Object.keys((d.story&&d.story.done)||{}).length;d.seenB=fresh?cur:cur-1;PROF.save();if(fresh)return}
+  if(cur<=d.seenB)return;const from=d.seenB;d.seenB=cur;PROF.save();const go=()=>{if(UPD.inMatch()||document.querySelector('.cl-ov,.evm')){setTimeout(go,3000);return}this.open(from,true)};setTimeout(go,1200)}};
+// check once the player reaches the hub
+{const hs=HUB.show.bind(HUB);HUB.show=function(...a){const r=hs(...a);if(!NOTES.ran){NOTES.ran=1;try{NOTES.check()}catch(e){}}return r}}
+// a NOTES button on the home screen, and a button in Settings
+{const h=SCR.home;SCR.home=m=>{h(m);const go=()=>{try{AU.ui()}catch(e){}NOTES.open(0,false)},L=m.querySelector('.h2-left');
+ if(L){const b=document.createElement('button');b.className='fab cl-fab';b.innerHTML=`<i>☰</i><b>NOTES</b><small>BUILD ${NOTES.cur()}</small>`;b.onclick=go;L.appendChild(b)}
+ else{const l=document.createElement('button');l.className='lnk cl-home';l.textContent=`BUILD ${NOTES.cur()} · PATCH NOTES ›`;l.onclick=go;m.appendChild(l)}}}
+{const st=PRG.settings.bind(PRG);PRG.settings=function(){st();const o=[...document.querySelectorAll('.evm')].pop();if(!o)return;
+ const add=()=>{const box=o.querySelector('.evm-b');if(!box||box.querySelector('#clRow'))return;const b=document.createElement('button');b.id='clRow';b.className='ghost2 pro-opt';b.textContent='PATCH NOTES';
+  const done=box.querySelector('[data-k="x"]');box.insertBefore(b,done);b.onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}NOTES.open(0,false)}};add();new MutationObserver(add).observe(o,{childList:true})}}
+{const st=document.createElement('style');st.textContent=`
+.cl-ov{position:fixed;inset:0;z-index:9600;background:rgba(5,4,3,.84);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
+.cl-p{width:min(460px,94vw);max-height:100%;display:flex;flex-direction:column;gap:8px;background:#14120d;border:1px solid #b08a46;border-radius:12px;padding:16px;box-shadow:0 0 40px rgba(242,169,59,.15)}
+.cl-p>small{color:#a89c7c;letter-spacing:.16em;font-size:10px}.cl-p>b{font:700 20px var(--disp);letter-spacing:.14em;color:#ffd58a}
+.cl-l{overflow:auto;-webkit-overflow-scrolling:touch;margin:4px -4px;padding:0 4px;flex:1;min-height:0}
+.cl-e{padding:10px 0;border-top:1px dashed #3a3424}.cl-e:first-child{border-top:0}
+.cl-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.cl-h b{font:700 13px var(--disp);letter-spacing:.12em;color:#efe5cc}.cl-h span{font:13px var(--type);color:#ffd58a}.cl-h small{margin-left:auto;color:#6a6250;font-size:10px;letter-spacing:.1em}
+.cl-e ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}.cl-e li{display:flex;gap:8px;align-items:flex-start;font:12px/1.4 var(--type);color:#d8cdb0}
+.cl-e li i{flex:none;font:700 9px var(--mono);font-style:normal;letter-spacing:.1em;padding:2px 5px;border-radius:3px;margin-top:2px;min-width:44px;text-align:center}
+.cl-new{background:#1d3020;color:#9fe0b0;border:1px solid #3a6a44}.cl-fix{background:#14202c;color:#9fc8ff;border:1px solid #34506e}.cl-change{background:#2a2010;color:#ffd58a;border:1px solid #6a5426}
+.cl-all{align-self:center;font-size:12px}.cl-home{display:block;margin:10px auto 4px;font-size:11px;letter-spacing:.14em;opacity:.8}`;document.head.appendChild(st)}
 // ===== input / choices UI =====
 const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new Set(),
  wait(req){return new Promise(res=>{this.req=req;this.res=res;this.sel.clear();this.apply()})},
