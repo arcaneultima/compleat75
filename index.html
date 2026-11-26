@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0a08">
-<title>COMPLEAT '75</title>
+<title>COMPLEAT</title>
 <link rel="icon" href="icon192.png"><link rel="apple-touch-icon" href="icon512.png">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
@@ -78,7 +78,7 @@ background-image:linear-gradient(rgba(190,220,200,.5) 1px,transparent 1px),linea
 color:#1c1912;background:linear-gradient(#e2c37f,#a8823f);box-shadow:0 2px 0 #4e3a16,inset 0 1px 0 #fff3cc;position:relative;white-space:nowrap;overflow:hidden}
 .plaque .gl{font-size:11px}
 .plaque.done{background:linear-gradient(#ffe7a0,#e9b443);box-shadow:0 0 10px #f2a93b,0 2px 0 #4e3a16}
-.plaque.done::after{content:"COMPILED";position:absolute;right:2px;font-size:6.5px;letter-spacing:.05em;background:#1c1912;color:#ffd57a;padding:1px 2px;border-radius:2px}
+.plaque.done::after{content:"COMPLEAT";position:absolute;right:2px;font-size:6.5px;letter-spacing:.05em;background:#1c1912;color:#ffd57a;padding:1px 2px;border-radius:2px}
 .plaque.ai{background:linear-gradient(#c96a5f,#7d2a22);color:#fff1e8;box-shadow:0 -2px 0 #3e100c,inset 0 1px 0 #f4a89c}
 .plaque.ai.done{background:linear-gradient(#ff8a7a,#c0281e);box-shadow:0 0 10px var(--red)}
 .zone{flex:1;min-height:0;position:relative}
@@ -286,7 +286,7 @@ details.rules summary{font:700 12px var(--disp);letter-spacing:.2em;color:var(--
 .plaque.img.me{border-bottom:3px solid var(--amber)}.plaque.img.ai{border-top:3px solid var(--red)}
 .plaque.img.done{box-shadow:0 0 14px var(--pc),0 0 0 2px var(--amber);overflow:visible}
 .plaque.img.done img{border-radius:3px}
-.plaque.img.done::after{content:"COMPLETE"}
+.plaque.img.done::after{content:"COMPLEAT"}
 .plaque.ai.done::after{background:#5a0f0a;color:#ffd0c8}
 .pq-dot{position:absolute;right:5px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;border:1.5px solid #f3e6c4;box-shadow:0 0 3px #000}
 .plaque.done .pq-dot{background:var(--pc);border-color:#fff;box-shadow:0 0 6px var(--pc)}
@@ -856,7 +856,7 @@ details.rules summary{font:700 12px var(--disp);letter-spacing:.2em;color:var(--
 .c3g,.c3h{position:absolute;inset:0;pointer-events:none;z-index:8;border-radius:6cqw}.c3i.av .c3g,.c3i.av .c3h,.c3i.tt .c3g,.c3i.tt .c3h{border-radius:10px}
 .c3g{background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.65),rgba(255,255,255,.14) 22%,transparent 48%);mix-blend-mode:overlay}
 .c3h{background:linear-gradient(115deg,transparent 18%,rgba(255,60,140,.55) 34%,rgba(255,230,60,.55) 43%,rgba(60,255,170,.55) 52%,rgba(60,170,255,.55) 61%,transparent 78%) var(--mx,50%) var(--my,50%)/260% 260%;mix-blend-mode:color-dodge;opacity:var(--ho,.2)}
-.c3i.card .cd-in>img{transform:translate(var(--px,0),var(--py,0)) scale(1.05)}
+.c3i.card .cd-in>img{transform:none}
 .ttp{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:10px;background:linear-gradient(135deg,#2a2114,#120e09);border:1px solid #6b5a33}.ttp b{display:block;font:700 18px var(--disp);letter-spacing:.1em;color:#fff;margin-bottom:6px}.ttp .ttl.big{font-size:15px;padding:8px 12px}
 #inspect .c3d{padding:0}#inspect .c3i.card{width:min(78vw,330px)}
 .pv-vals{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}.pv-vals button{width:30px;height:30px;border-radius:50%;border:1px solid #4a3f2a;background:#15110c;color:#e9dfc6;font:700 14px var(--disp)}.pv-vals button.on{background:var(--rc);color:#120d06;border-color:var(--rc)}
@@ -1123,10 +1123,10 @@ details.rules summary{font:700 12px var(--disp);letter-spacing:.2em;color:var(--
   <div class="pickh">CHOOSE 3 DIRECTIVES <span id="pickn">0/3</span></div><div id="pick"></div><p class="pickp">The machine fields 3 of the others.</p>
   <button class="big-btn" id="deploy">TAP TO DEPLOY</button>
   <details class="rules"><summary>HOW TO PLAY</summary>
-   <b>Goal:</b> compile all 3 of your directives.<br>
+   <b>Goal:</b> compleat all 3 of your directives.<br>
    <b>Each turn:</b> play 1 card, or REFILL to 5 cards.<br>
    <b>Drag</b> a card to a lane. Face-up only in a lane that shows its directive. <b>Double-tap</b> a card in hand to play it face-down (worth 2) anywhere.<br>
-   <b>Compile:</b> start your turn with 10+ in a line and more than the machine there.<br>
+   <b>Compleat:</b> start your turn with 10+ in a line and more than the machine there.<br>
    <b>Override Key:</b> lead 2 lines at the start of your turn to take it. Spend it on a compleat or refill to rearrange directives.<br>
    <b>Tap</b> any card to read it.
   </details>
@@ -1147,7 +1147,7 @@ const sleep=ms=>FAST||ms<=0||(typeof S!=='undefined'&&S&&S.sim)?Promise.resolve(
 // Drop your art here: ART_URL['FIRE-3']='img/fire3.png' or ART_URL['FIRE']='img/fire.png'
 const ART_URL={};
 const ART_CARD={"DARKNESS-0": "blackout-0", "DARKNESS-1": "blackout-1", "DARKNESS-2": "blackout-2", "DARKNESS-3": "blackout-3", "DARKNESS-4": "blackout-4", "DARKNESS-5": "blackout-5", "PLAGUE-0": "contagion-0", "PLAGUE-1": "contagion-1", "PLAGUE-2": "contagion-2", "PLAGUE-3": "contagion-3", "PLAGUE-4": "contagion-4", "PLAGUE-5": "contagion-5", "GRAVITY-0": "magnetism-0", "GRAVITY-1": "magnetism-1", "GRAVITY-2": "magnetism-2", "GRAVITY-4": "magnetism-4", "GRAVITY-5": "magnetism-5", "GRAVITY-6": "magnetism-6", "DEATH-0": "terminate-0", "DEATH-1": "terminate-1", "DEATH-2": "terminate-2", "DEATH-3": "terminate-3", "DEATH-4": "terminate-4", "DEATH-5": "terminate-5", "LIGHT-0": "scan-0", "LIGHT-1": "scan-1", "LIGHT-2": "scan-2", "LIGHT-3": "scan-3", "LIGHT-4": "scan-4", "LIGHT-5": "scan-5", "METAL-0": "shield-0", "METAL-1": "shield-1", "METAL-2": "shield-2", "METAL-3": "shield-3", "METAL-5": "shield-5", "METAL-6": "shield-6", "FIRE-0": "overload-0", "FIRE-1": "overload-1", "FIRE-2": "overload-2", "FIRE-3": "overload-3", "FIRE-4": "overload-4", "FIRE-5": "overload-5", "LIFE-0": "replicate-0", "LIFE-1": "replicate-1", "LIFE-2": "replicate-2", "LIFE-3": "replicate-3", "LIFE-4": "replicate-4", "LIFE-5": "replicate-5"};
-const ART_TXT={"DARKNESS-0": ["", "Draw three cards. Then shift one of your opponent’s covered cards.", ""], "DARKNESS-1": ["", "Flip one of your opponent’s cards. You may then shift that card.", ""], "DARKNESS-2": ["Face-down cards in this stack are worth 4 each.", "You may flip a covered card in this line.", ""], "DARKNESS-3": ["", "Play a card from your hand face-down in a different line.", ""], "DARKNESS-4": ["", "Move one face-down card to a different line.", ""], "DARKNESS-5": ["", "Discard one card from your hand.", ""], "PLAGUE-0": ["", "Your opponent discards one card from hand.", "Your opponent cannot play a card into this line."], "PLAGUE-1": ["After your opponent discards one or more cards, draw one card.", "Your opponent discards one card from hand.", ""], "PLAGUE-2": ["", "Discard at least one card. Your opponent discards one more than the number you discarded.", ""], "PLAGUE-3": ["", "Turn every other uncovered face-up card face-down.", ""], "PLAGUE-4": ["", "", "At turn end, your opponent deletes one of their own face-down cards. You may then flip this card."], "PLAGUE-5": ["", "Discard one card from your hand.", ""], "GRAVITY-0": ["", "For every pair of cards in this line, place the top card of your deck face-down beneath this card.", ""], "GRAVITY-1": ["", "Draw two cards. Then shift a card into or out of this line.", ""], "GRAVITY-2": ["", "Flip one card, then shift it into this line.", ""], "GRAVITY-4": ["", "Shift one face-down card into this line.", ""], "GRAVITY-5": ["", "Discard one card from your hand.", ""], "GRAVITY-6": ["", "Your opponent plays the top card of their deck face-down in this line.", ""], "DEATH-0": ["", "In each of the two other lines, delete one card.", ""], "DEATH-1": ["START — You may draw a card. If you do, delete another card, then delete this one.", "", ""], "DEATH-2": ["", "Choose a line. Delete every card there with a value of 1 or 2.", ""], "DEATH-3": ["", "Delete one face-down card.", ""], "DEATH-4": ["", "Delete one card worth 0 or 1.", ""], "DEATH-5": ["", "Discard one card from your hand.", ""], "LIGHT-0": ["", "Flip a card. Draw as many cards as its current value.", ""], "LIGHT-1": ["", "", "At turn end, draw one card."], "LIGHT-2": ["", "Draw two cards. Reveal a face-down card. You may then shift it or flip it.", ""], "LIGHT-3": ["", "Choose another line. Shift every face-down card here to that line, keeping each stack in order.", ""], "LIGHT-4": ["", "Your opponent shows you every card in their hand.", ""], "LIGHT-5": ["", "Discard one card from your hand.", ""], "METAL-0": ["Subtract 2 from your opponent’s total in this line.", "Flip one card in play.", ""], "METAL-1": ["", "Draw two cards. On their next turn, your opponent cannot complete a Directive.", ""], "METAL-2": ["Your opponent cannot play a face-down card into this line.", "", ""], "METAL-3": ["", "Draw a card. Choose a different line with at least eight cards and delete every card in it.", ""], "METAL-5": ["", "Discard one card from your hand.", ""], "METAL-6": ["Before this card is covered or flipped, delete it.", "", ""], "FIRE-0": ["", "Flip another card, then draw two cards.", "Before this card is covered, draw one card, then flip another card."], "FIRE-1": ["", "Discard a card from your hand. If you discarded it, delete a card in play.", ""], "FIRE-2": ["", "Discard a card from your hand. If you discarded it, return a card in play to its owner’s hand.", ""], "FIRE-3": ["", "", "At turn end, you may discard a card from your hand to flip a card in play."], "FIRE-4": ["", "Discard at least one card. Draw that many cards, plus one more.", ""], "FIRE-5": ["", "Discard one card from your hand.", ""], "LIFE-0": ["At turn end, delete this card if it is covered.", "For each line where you have a card, play one card face-down from the top of your deck into that line.", ""], "LIFE-1": ["", "Flip a card. Then make a second single-card flip.", ""], "LIFE-2": ["", "Draw a card. Then you may turn one face-down card face-up.", ""], "LIFE-3": ["", "", "Before this card is covered, play your deck’s top card face-down in a different line."], "LIFE-4": ["", "Draw a card if this one covers another card.", ""], "LIFE-5": ["", "Discard one card from your hand.", ""]};
+const ART_TXT={"DARKNESS-0": ["", "Draw three cards. Then shift one of your opponent’s covered cards.", ""], "DARKNESS-1": ["", "Flip one of your opponent’s cards. You may then shift that card.", ""], "DARKNESS-2": ["Face-down cards in this stack are worth 4 each.", "You may flip a covered card in this line.", ""], "DARKNESS-3": ["", "Play a card from your hand face-down in a different line.", ""], "DARKNESS-4": ["", "Move one face-down card to a different line.", ""], "DARKNESS-5": ["", "Discard one card from your hand.", ""], "PLAGUE-0": ["", "Your opponent discards one card from hand.", "Your opponent cannot play a card into this line."], "PLAGUE-1": ["After your opponent discards one or more cards, draw one card.", "Your opponent discards one card from hand.", ""], "PLAGUE-2": ["", "Discard at least one card. Your opponent discards one more than the number you discarded.", ""], "PLAGUE-3": ["", "Turn every other uncovered face-up card face-down.", ""], "PLAGUE-4": ["", "", "At turn end, your opponent deletes one of their own face-down cards. You may then flip this card."], "PLAGUE-5": ["", "Discard one card from your hand.", ""], "GRAVITY-0": ["", "For every pair of cards in this line, place the top card of your deck face-down beneath this card.", ""], "GRAVITY-1": ["", "Draw two cards. Then shift a card into or out of this line.", ""], "GRAVITY-2": ["", "Flip one card, then shift it into this line.", ""], "GRAVITY-4": ["", "Shift one face-down card into this line.", ""], "GRAVITY-5": ["", "Discard one card from your hand.", ""], "GRAVITY-6": ["", "Your opponent plays the top card of their deck face-down in this line.", ""], "DEATH-0": ["", "In each of the two other lines, delete one card.", ""], "DEATH-1": ["START — You may draw a card. If you do, delete another card, then delete this one.", "", ""], "DEATH-2": ["", "Choose a line. Delete every card there with a value of 1 or 2.", ""], "DEATH-3": ["", "Delete one face-down card.", ""], "DEATH-4": ["", "Delete one card worth 0 or 1.", ""], "DEATH-5": ["", "Discard one card from your hand.", ""], "LIGHT-0": ["", "Flip a card. Draw as many cards as its current value.", ""], "LIGHT-1": ["", "", "At turn end, draw one card."], "LIGHT-2": ["", "Draw two cards. Reveal a face-down card. You may then shift it or flip it.", ""], "LIGHT-3": ["", "Choose another line. Shift every face-down card here to that line, keeping each stack in order.", ""], "LIGHT-4": ["", "Your opponent shows you every card in their hand.", ""], "LIGHT-5": ["", "Discard one card from your hand.", ""], "METAL-0": ["Subtract 2 from your opponent’s total in this line.", "Flip one card in play.", ""], "METAL-1": ["", "Draw two cards. On their next turn, your opponent cannot compleat a Directive.", ""], "METAL-2": ["Your opponent cannot play a face-down card into this line.", "", ""], "METAL-3": ["", "Draw a card. Choose a different line with at least eight cards and delete every card in it.", ""], "METAL-5": ["", "Discard one card from your hand.", ""], "METAL-6": ["Before this card is covered or flipped, delete it.", "", ""], "FIRE-0": ["", "Flip another card, then draw two cards.", "Before this card is covered, draw one card, then flip another card."], "FIRE-1": ["", "Discard a card from your hand. If you discarded it, delete a card in play.", ""], "FIRE-2": ["", "Discard a card from your hand. If you discarded it, return a card in play to its owner’s hand.", ""], "FIRE-3": ["", "", "At turn end, you may discard a card from your hand to flip a card in play."], "FIRE-4": ["", "Discard at least one card. Draw that many cards, plus one more.", ""], "FIRE-5": ["", "Discard one card from your hand.", ""], "LIFE-0": ["At turn end, delete this card if it is covered.", "For each line where you have a card, play one card face-down from the top of your deck into that line.", ""], "LIFE-1": ["", "Flip a card. Then make a second single-card flip.", ""], "LIFE-2": ["", "Draw a card. Then you may turn one face-down card face-up.", ""], "LIFE-3": ["", "", "Before this card is covered, play your deck’s top card face-down in a different line."], "LIFE-4": ["", "Draw a card if this one covers another card.", ""], "LIFE-5": ["", "Discard one card from your hand.", ""]};
 
 // ===== data =====
 const PRO={
@@ -1171,7 +1171,7 @@ const CARDS={
  DARKNESS:[[0,'','Draw 3 cards. Shift 1 of your opponent\'s covered cards.',''],[1,'','Flip 1 of your opponent\'s cards. You may shift that card.',''],
   [2,'All face-down cards in this stack have a value of 4.','You may flip 1 covered card in this line.',''],[3,'','Play 1 card face-down in another line.',''],
   [4,'','Shift 1 face-down card.',''],[5,'',D1,'']],
- METAL:[[0,'Your opponent\'s total value in this line is reduced by 2.','Flip 1 card.',''],[1,'','Draw 2 cards. Your opponent can\'t compile next turn.',''],
+ METAL:[[0,'Your opponent\'s total value in this line is reduced by 2.','Flip 1 card.',''],[1,'','Draw 2 cards. Your opponent can\'t compleat next turn.',''],
   [2,'Your opponent can\'t play cards face-down in this line.','',''],[3,'','Draw 1 card. Delete all cards in 1 other line with 8 or more cards.',''],
   [5,'',D1,''],[6,'When this card would be covered or flipped: First, delete this card.','','']],
  PSYCHIC:[[0,'','Draw 2 cards. Your opponent discards 2 cards, then reveals their hand.',''],[1,'Your opponent can only play cards face-down.','','Start: Flip this card.'],
@@ -1266,7 +1266,7 @@ async function runEffect(c,which){const k=c.proto+'-'+c.v;let fx=EFF[k]&&EFF[k][
  if(S.depth===0)await flushUncovers()}
 async function flushUncovers(){if(S.flushing)return;S.flushing=true;try{let g=0;while(S.uq.length&&g++<40){const c=S.uq.shift();if(onBoard(c)&&isTop(c)&&c.up&&c.mid){log(`${cname(c)} is uncovered.`);await runEffect(c,'mid')}}if(S.uq.length){S.uq=[];log('Chain limit reached: remaining triggers fizzle.')}}finally{S.flushing=false}}
 function checkWin(){for(const w of ['me','ai'])if(S.p[w].protos.every(p=>p.compiled)){S.winner=w;return true}return false}
-async function compileLine(w,li){const pr=S.p[w].protos[li];const was=pr.compiled;log(`${NAME[w]} COMPILE ${PRO[pr.name].nm}!`);
+async function compileLine(w,li){const pr=S.p[w].protos[li];const was=pr.compiled;log(`${NAME[w]} COMPLEAT ${PRO[pr.name].nm}!`);
  await V.compileFx(li,w);const cs=[...S.lines[li].me,...S.lines[li].ai];
  for(const c of cs){c.up=true;S.p[c.owner].discard.push(c)}S.lines[li].me=[];S.lines[li].ai=[];await V.render();
  if(was){const od=S.p[OPP[w]];if(!od.deck.length&&od.discard.length&&RECYC())od.deck=shuffle(od.discard.splice(0));
@@ -1458,7 +1458,7 @@ async function takeTurn(w){S.turnNo++;S.turn=w;await V.render();await V.banner(w
  await hook('turnStart',w);if(S.winner)return;await triggers(w,'Start');
  if(leads(w)>=2&&S.control!==w){S.control=w;log(`${NAME[w]} take the Override Key.`);await V.control(w)}
  const cl=compilable(w);if(window.__CT)window.__CT(w,cl);if(S.noCompile[w]){S.noCompile[w]=false;if([0,1,2].some(li=>{const a=total(li,w);return a>=thresh(w,li)&&a>total(li,OPP[w])}))log(`${NAME[w]} can't compleat this turn.`)}
- if(cl.length){const li=cl.length>1?await pickLine(w,cl,li=>S.p[w].protos[li].compiled?0:1+total(li,w)*.01,'Compile which line?'):cl[0];
+ if(cl.length){const li=cl.length>1?await pickLine(w,cl,li=>S.p[w].protos[li].compiled?0:1+total(li,w)*.01,'Compleat which line?'):cl[0];
   await compileLine(w,li);if(S.winner)return;await useControl(w)}
  else{if(window.__HARVEST&&w==='me'&&!S.sim)window.__HARVEST.push(JSON.stringify(cloneS()));await hook('preAction',w);if(S.winner)return;let a;const k=ctrl(w);if(k==='ai'){await sleep(380);a=await AI.decide(w)}else{if(k==='local')V.setStatus('go');a=await ask(w,{kind:'action'});V.setStatus('')}
   await doAction(w,a);if(!S.winner)await hook('postAction',w,a)}
@@ -1474,13 +1474,13 @@ async function gameLoop(){try{while(!S.winner&&S.turnNo<(S.rx&&S.rx.ceil||400)){
 // Live: both Directives are in ALLP, so they show up in deck picks, shop, collection and Field Operations.
 // Simulation: ?auto&wave1 (random decks), ?auto&dme=SPEED,FIRE,WATER&dai=..., or W1SIM.batch(...).
 PRO.SPEED={c:'#2e9a78',g:'»',nm:'ACCELERATE'};PRO.SPIRIT={c:'#35a3b8',g:'◎',nm:'RESONANCE'};
-CARDS.SPEED=[[0,'','Play 1 card.',''],[1,'After you clear cache: Draw 1 card.','Draw 2 cards.',''],[2,'When this card would be deleted by compiling: Shift this card, even if this card is covered.','',''],
+CARDS.SPEED=[[0,'','Play 1 card.',''],[1,'After you clear cache: Draw 1 card.','Draw 2 cards.',''],[2,'When this card would be deleted by compleating: Shift this card, even if this card is covered.','',''],
  [3,'','Shift 1 of your other cards.','End: You may shift 1 of your cards. If you do, flip this card.'],[4,'','Shift 1 of your opponent\'s face-down cards.',''],[5,'','You discard 1 card.','']];
 CARDS.SPIRIT=[[0,'','Refresh. Draw 1 card.','Skip your check cache phase.'],[1,'You can play cards in any line.','Draw 2 cards.','Start: Either discard 1 card or flip this card.'],[2,'','You may flip 1 card.',''],
  [3,'After you draw cards: You may shift this card, even if this card is covered.','',''],[4,'','Swap the positions of 2 of your protocols.',''],[5,'','You discard 1 card.','']];
 Object.assign(ART_TXT,{
  'SPEED-0':['','Play one more card.',''],'SPEED-1':['After you clear your cache by discarding down to five, draw one card.','Draw two cards from your deck.',''],
- 'SPEED-2':['Before a Directive completion would clear this card, shift it to another line, even if it is covered.','',''],
+ 'SPEED-2':['Before a compleat would clear this card, shift it to another line, even if it is covered.','',''],
  'SPEED-3':['','Shift one of your other cards to another line.','At turn end, you may shift one of your cards. If you do, flip this card.'],
  'SPEED-4':['','Shift one opposing face-down card to another line.',''],'SPEED-5':['','Discard one card from your hand.',''],
  'SPIRIT-0':['','Refill your hand to five cards, then draw one more.','Skip the hand check on your turn.'],
@@ -1721,7 +1721,7 @@ const V={EL:{},prevTot:{},
   const f=document.createElement('div');Object.assign(f.style,{position:'absolute',left:L.x+'px',top:L.y+'px',width:L.w+'px',height:L.h+'px',borderRadius:'8px',background:col});this.fx().appendChild(f);
   f.animate([{opacity:.7},{opacity:0}],{duration:700}).onfinish=()=>f.remove();
   for(let i=0;i<30;i++)this.part(L.x+L.w/2,L.y+L.h/2,{s:3+vr()*4,c:i%2?col:'#fff',glow:1,dx:(vr()-.5)*220,dy:(vr()-.5)*300,t:800+vr()*400});
-  await this.stamp('COMPILED',L.x+L.w/2,L.y+L.h/2,col);await sleep(300)},
+  await this.stamp('COMPLEAT',L.x+L.w/2,L.y+L.h/2,col);await sleep(300)},
  async stamp(t,x,y,col){const s=document.createElement('div');s.className='stamp';s.textContent=t;s.style.color=col;s.style.borderColor=col;this.fx().appendChild(s);
   const r=s.getBoundingClientRect();s.style.left=x-r.width/2+'px';s.style.top=y-r.height/2+'px';SFX.stamp();
   s.animate([{transform:'rotate(-10deg) scale(2.4)',opacity:0},{transform:'rotate(-10deg) scale(.95)',opacity:1,offset:.6},{transform:'rotate(-10deg) scale(1)',opacity:1}],{duration:320});
@@ -2131,7 +2131,7 @@ Object.assign(V,{
   for(const e of els){const R=offRect(e);e.animate([{transform:'none',filter:'none',opacity:1},{transform:'translateY(-70px) scale(1.12)',filter:'brightness(3) blur(5px)',opacity:0}],{duration:520,easing:'ease-in',fill:'forwards'});
    FXE.burst(R.x+R.w/2,R.y+R.h/2,14,{s:[3,6],sp:[20,80],vy0:-160,life:[.6,1.1],col:[col,'#fff3c8'],jx:R.w,jy:R.h,flick:1})}
   const flash=mkDiv('whiteflash');flash.animate([{opacity:.85},{opacity:0}],{duration:450}).onfinish=()=>flash.remove();
-  await this.stamp('COMPILED',cx,cy,col);
+  await this.stamp('COMPLEAT',cx,cy,col);
   const idx=S.p[w].protos.filter(p=>p.compiled).length,pr=S.p[w].protos[li];
   if(!pr.compiled&&idx<3){const pip=$((w==='me'?'me':'ai')+'pips').children[idx],P=offRect(pip);
    await new Promise(rs=>FXE.add({k:'comet',x:cx,y:cy,tx:P.x+P.w/2,ty:P.y+P.h/2,life:.6,col,done:()=>{FXE.add({k:'flash',x:P.x+P.w/2,y:P.y+P.h/2,s:50,life:.4,col});AU.ding();pip.classList.add('on');pip.animate([{transform:'scale(2)'},{transform:'none'}],{duration:400});rs()}}))}
@@ -2344,7 +2344,7 @@ function plaqueSwap(w,a,b){let k=0;for(let j=0;j<3;j++){const i=a.indexOf(b[j]);
  if(k){AU.flip&&AU.flip();setTimeout(()=>AU.flip&&AU.flip(),200)}}
 function lockFx(w,on){for(let li=0;li<3;li++){const pl=V.lane(li).querySelector('.plaque.'+w);pl&&pl.classList.toggle('locked',on)}
  const L=offRect($('lanes')),pl=V.lane(1).querySelector('.plaque.'+w);if(!pl)return;const R=offRect(pl);
- if(on){FXE.add({k:'stamp',x:L.x+L.w/2,y:R.y+R.h/2,s:17,text:'COMPILE LOCKED',col:'rgba(217,57,47,1)',life:1.7,rot0:-.06});
+ if(on){FXE.add({k:'stamp',x:L.x+L.w/2,y:R.y+R.h/2,s:17,text:'COMPLEAT LOCKED',col:'rgba(217,57,47,1)',life:1.7,rot0:-.06});
   for(let li=0;li<3;li++){const p=V.lane(li).querySelector('.plaque.'+w),Q=offRect(p);FXE.add({k:'rring',x:Q.x+Q.w/2,y:Q.y+Q.h/2,w:Q.w,h:Q.h,s:1.4,s2:1,life:.35,col:'#ff5a4a',lw:3,delay:li*.06})}SX.lock()}
  else FXE.add({k:'flash',x:L.x+L.w/2,y:R.y+R.h/2,s:140,life:.4,col:'#9fe0ff',a:.5})}
 {const hd=V.hud;V.hud=function(){hd.call(this);if(FAST||!S)return;this._ord=this._ord||{};this._nc=this._nc||{};
@@ -2513,7 +2513,7 @@ function rectHTML(p,on,vx){const h=HDR[p];const V=vx!==undefined?vx:(PROF.d.eq.v
 function tierChip(p){const t=PROF.tier(p),T=TIERS[t];return`<span class="tchip" style="--tc:${T.c}">${T.n}</span>`}
 function mbar(p){const x=PROF.d.mast[p]||0,t=PROF.tier(p);if(t>=TIERS.length-1)return`<div class="mbar"><b style="width:100%;background:${TIERS[TIERS.length-1].c}"></b></div>`;const a=TIERS[t].xp,b=TIERS[t+1].xp;return`<div class="mbar"><b style="width:${Math.round(100*(x-a)/(b-a))}%;background:${TIERS[t+1].c}"></b></div>`}
 SCR.home=(m)=>{const d=PROF.d;const today=new Date().toDateString();
- m.innerHTML=`<div class="logo sm">COMPLEAT '75</div>
+ m.innerHTML=`<div class="logo sm">COMPLEAT</div>
  <div class="card2"><div class="c2h">YOUR DIRECTIVES <button class="lnk" id="hEdit">EDIT ›</button></div><div class="deck3">${d.pick.map(p=>`<div>${rectHTML(p,false)}${tierChip(p)}${mbar(p)}</div>`).join('')}</div></div>
  <div class="card2"><div class="c2h">QUICK MATCH</div><div class="seg" id="hDiff">${DIFF.map(([n,t],i)=>`<button class="${i===d.diff?'on':''}" data-i="${i}"><b>${n}</b><small>${t}</small></button>`).join('')}</div>
   <button class="big-btn wide" id="hPlay">DEPLOY</button><div class="fw ${d.fwDay===today?'done':''}">${d.fwDay===today?'✓ First win bonus claimed today':'★ First win of the day: +50 Punches'}</div></div>
@@ -2577,7 +2577,7 @@ const REW={show(R,win,cfg){return new Promise(done=>{const o=document.createElem
  go.onclick=()=>{AU.ui();o.animate([{opacity:1},{opacity:0}],{duration:200}).onfinish=()=>{o.remove();done()}}})}};
 // ----- splash: unlocks audio on first tap (phones block sound until a tap) -----
 const SPLASH={show(){const s=document.createElement('div');s.id='splash';s.innerHTML=`<div class="sp-radar"></div><div class="sp-grid"></div>
- <div class="sp-in"><div class="sp-stamp">TOP SECRET</div><div class="logo">COMPLEAT<br>'75</div><div class="sp-tap">TAP TO BEGIN</div><div class="sp-f">EYES ONLY · FILE 1975-C</div></div>`;
+ <div class="sp-in"><div class="sp-stamp">TOP SECRET</div><div class="logo">COMPLEAT</div><div class="sp-tap">TAP TO BEGIN</div><div class="sp-f">EYES ONLY · FILE 1975-C</div></div>`;
  $('app').appendChild(s);let gone=false;
  s.addEventListener('pointerdown',()=>{if(gone)return;gone=true;AU.init();if(typeof MUS!=='undefined')MUS.play('ambient');AU.stamp();CAM.shake&&CAM.shake(.3);buzz(20);
   s.querySelector('.sp-stamp').animate([{transform:'rotate(-8deg) scale(1.6)',opacity:.4},{transform:'rotate(-8deg) scale(1)',opacity:1}],{duration:250});
@@ -2640,7 +2640,7 @@ const SECT=[
  {k:'b',n:'BETA',sub:'THE WIRE',pal:['#1a0f24','#d0a0ff'],col:'#b46cf0',blurb:'Hacker crews selling access to anyone who pays. They play for keeps.'},
  {k:'g',n:'GAMMA',sub:'THE AGENCY',pal:['#24100c','#ffb0a0'],col:'#ff6a58',blurb:'Government signal men. They do not lose, and they do not forget.'},
  {k:'e',n:'EPSILON',sub:'THE ALL-SEEING',pal:['#081c1a','#ffe08a'],col:'#ffd23a',blurb:'Delta was erased. Whoever erased it is waiting for you.'}];
-const M_TXT={aiKey:()=>'Starts holding the Override Key',aiExtra:n=>`Starts with ${n} extra card${n>1?'s':''}`,aiPre:n=>`${n} of their directives start compiled`,th:o=>`You need ${o.me} to compile`};
+const M_TXT={aiKey:()=>'Starts holding the Override Key',aiExtra:n=>`Starts with ${n} extra card${n>1?'s':''}`,aiPre:n=>`${n} of their directives start compleated`,th:o=>`You need ${o.me} to compleat`};
 const R_=(id,name,tag,decks,lvl,q,w,l,o={})=>({id,name,tag,decks,lvl,q,w,l,...o});
 const STORY=[
  R_('a1','DIALTONE','Kid with a blue box and a bad attitude',['FIRE','WATER','PSYCHIC'],0,'You found my board? Cute. Hang up and try again.','Click. Dial tone. Bye.','Okay okay, you got me. Don\'t tell my mom.'),
@@ -2720,17 +2720,17 @@ b7:['KINGPIN.EXE runs the Wire from a room nobody has seen, through intermediari
 g1:['Agent Grey has worked for four agencies and is remembered by none of them. His face is forgettable by training. His reports are perfect, and his targets never see him coming.','REDACTED','Quiet control. Information denial.'],
 g2:['Comrade Zero defected west in 1968, then east again in 1971, and now works for whoever pays in the right currency. He knows both sides\' playbooks and trusts neither.','Checkpoint Charlie, Berlin. Usually leaving.','Mind games and hard deletes.'],
 g3:['The Clerk reads every telegram in the building before it is sent. A mild-mannered cryptographer who has broken eleven national ciphers and still takes the bus to work.','A basement office at Fort Meade. Nameplate removed.','Reveals your hand. Knows your plays.'],
-g4:['The Handler has run agents in four countries and lost none he did not mean to lose. He bends rules until they work for him, then rewrites them. You will need more than usual to win.','A safehouse in Vienna.','Raises your compile threshold to 11.'],
+g4:['The Handler has run agents in four countries and lost none he did not mean to lose. He bends rules until they work for him, then rewrites them. You will need more than usual to win.','A safehouse in Vienna.','Raises your compleat threshold to 11.'],
 g5:['An ordinary accountant in Ohio for nine years, until the call came. Sleeper agents do not hesitate when activated. Nothing about her is what it seems.','A split-level home in Dayton. Lawn always mowed.','Replication and patient traps.'],
 g6:['Director Voss signs orders no one reads and buries operations no one remembers. He climbed the ladder by making problems disappear, sometimes along with the people attached to them.','A corner office with no windows.','Shields, deletions, and an iron grip.'],
-g7:['Every wire in the country runs through the Minister\'s office. He decides what the public hears and what it never will. He claims to answer to no one. That claim is false.','The Ministry of Signals. Floor unlisted.','Starts with the key. You need 12 to compile.'],
+g7:['Every wire in the country runs through the Minister\'s office. He decides what the public hears and what it never will. He claims to answer to no one. That claim is false.','The Ministry of Signals. Floor unlisted.','Starts with the key. You need 12 to compleat.'],
 e1:['The Initiate took the oath last spring and has been trying to prove worthy ever since. Eager, precise, and a little afraid of the people above them.','A lodge building with no address.','Clean, disciplined fundamentals.'],
 e2:['The Adept speaks in checksums and believes the future is a solved equation. They do not play cards so much as execute them.','The archive beneath the lodge.','Calculated control.'],
 e3:['The Keeper holds the master key to every system in the West, and some in the East. Every lock you have ever picked was designed with his key in mind.','The vault room. Location classified above your clearance.','Starts with the Override Key.'],
-e4:['The Architect designed Sector Delta and then erased it, along with everyone who worked there. Precise, cold, and proud of the deletion.','The ruins of Sector Delta.','One directive already compiled before you sit down.'],
+e4:['The Architect designed Sector Delta and then erased it, along with everyone who worked there. Precise, cold, and proud of the deletion.','The ruins of Sector Delta.','One directive already compleated before you sit down.'],
 e5:['The Oracle answers questions before they are asked. Whether that is prophecy or perfect surveillance, the result is the same: she is never surprised.','A room with no doors.','Extra cards and impossible foresight.'],
 e6:['Seven voices behind a curtain, one vote. The Council decides which governments rise and which hackers disappear. They have never ruled against themselves.','The chamber.','The key, extra cards, and a unanimous verdict.'],
-e7:['The Eye has watched every match you have played since the Basement. Every opponent, every win, every mistake. You were not recruited into this war. You were selected.','Everywhere.','Starts compiled, holding the key. You need 12.']};
+e7:['The Eye has watched every match you have played since the Basement. Every opponent, every win, every mistake. You were not recruited into this war. You were selected.','Everywhere.','Starts compleated, holding the key. You need 12.']};
 STORY.forEach(s=>{const b=BIO[s.id];if(b){s.bio=b[0];s.seen=b[1];s.mo=b[2]}s.hidden=s.sec>=2});
 // dossier with backstory + redacted decks in Gamma/Epsilon
 SCR.dossier=(m,s)=>{const S0=SECT[s.sec],done=PROF.d.story.done[s.id],hide=s.hidden&&!done;
@@ -3669,7 +3669,7 @@ SN.p08=async function(){TERM.open('C-075 / EXECUTIVE AUTHORIZATION');const L=SN_
 SN.compCard=function(){return new Promise(res=>{const L=SN_DATA.END.card;const ov=SHEET.open('sn-cc2',`<div class="cc2-in">${L.map((l,i)=>`<b style="--i:${i}">${esc(l)}</b>`).join('')}<small>Rewards for THE EYE have been recorded.</small><button class="big-btn" id="ccGo">CONTINUE</button></div>`);CUE.stamp();$('ccGo').onclick=()=>{AU.ui();SHEET.close(ov);res()}})};
 SN.p09=async function(){TERM.open('PRIVATE TRANSMISSION / Q');let skipped=false;$('tmSkip').textContent='SKIP ENDING';$('tmSkip').onclick=e=>{e.stopPropagation();skipped=true;TERM.fast=true;const t=TERM._tap;TERM._tap=null;t&&t()};
  await TERM.beats(SN_DATA.END.p09);if(skipped){TERM.close();return'skip'}await TERM.cursor(500);await TERM.cursor(500);TERM.status('LOCAL SESSION READY','dim');await TERM.ask([['c','CONTINUE',1]]);TERM.close(true);return'ok'};
-SN.endCard=function(replay){return new Promise(res=>{const ov=SHEET.open('sn-end',`<div class="end-in"><div class="end-t">COMPLEAT '75</div><div class="end-s">THE MORNING AFTER</div><div class="end-e">END OF CAMPAIGN</div><div class="end-b"><button class="big-btn" id="enHQ">RETURN TO HQ</button><button class="ghost2" id="enCF">VIEW CASE FILE</button></div></div>`);
+SN.endCard=function(replay){return new Promise(res=>{const ov=SHEET.open('sn-end',`<div class="end-in"><div class="end-t">COMPLEAT</div><div class="end-s">THE MORNING AFTER</div><div class="end-e">END OF CAMPAIGN</div><div class="end-b"><button class="big-btn" id="enHQ">RETURN TO HQ</button><button class="ghost2" id="enCF">VIEW CASE FILE</button></div></div>`);
  $('enHQ').onclick=()=>{AU.ui();SHEET.close(ov);HUB.show('home');res()};$('enCF').onclick=()=>{AU.ui();SHEET.close(ov);HUB.show('casefile',{sec:3});res()}})};
 // ----- the apartment (optional flavor; never gates progress) -----
 SN.roomState=function(morning){const st={tv:'The late film. No bulletin.',radio:'Dance music, turned low.',phone:'Dial tone.',window:'Streetlight on a wet street.',paper:"Yesterday's paper.",crt:'C-075 / LOCAL TERMINAL READY'};
@@ -5501,7 +5501,7 @@ const PRG={gen:0,
  // ---------- A00 title ----------
  title(){const s=OB.st();const prog=s.complete||s.stage!=='title'||PROF.d.stats&&PROF.d.stats.games>0;PS.stopAll();
   const o=document.createElement('div');o.id='splash';o.className='pro-title';
-  o.innerHTML=`<div class="pt-in"><div class="logo pt-logo">COMPLEAT<br>'75</div><div class="pt-b"><button class="big-btn" id="ptGo">${prog?'CONTINUE':'START'}</button><button class="lnk" id="ptSet">SETTINGS</button></div></div>`;
+  o.innerHTML=`<div class="pt-in"><div class="logo pt-logo">COMPLEAT</div><div class="pt-b"><button class="big-btn" id="ptGo">${prog?'CONTINUE':'START'}</button><button class="lnk" id="ptSet">SETTINGS</button></div></div>`;
   $('app').appendChild(o);const L=o.querySelector('.pt-logo'),B=o.querySelector('.pt-b');
   if(!this.rm()){L.animate([{opacity:0,transform:'scale(1.35) rotate(-3deg)'},{opacity:1,transform:'none'}],{duration:220,delay:500,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'backwards'});B.animate([{opacity:0},{opacity:1}],{duration:400,delay:900,fill:'backwards'})}
   setTimeout(()=>{try{AU.stamp&&SX.ok()&&AU.stamp()}catch(e){}},520);
@@ -5889,9 +5889,9 @@ const ENUM={path:[],i:0,br:[],
 function fillCard(c){if(c.top===undefined){const row=CARDS[c.proto].find(r=>r[0]===c.v);const T=ART_TXT[c.proto+'-'+c.v]||[row[1],row[2],row[3]];c.top=T[0];c.mid=T[1];c.bot=T[2]}return c}
 function stateFrom(json){const s=JSON.parse(json);for(const w of['me','ai']){for(const k of['deck','hand','discard'])s.p[w][k].forEach(fillCard);}for(const L of s.lines)for(const w of['me','ai'])L[w].forEach(fillCard);s.hist=s.hist||{me:[],ai:[]};s.log=[];s.uq=[];s.depth=0;s.flushing=false;s.srcStack=[];return s}
 const GOALS={
- block:{t:'BLOCK THE COMPILE',d:'The machine is set to compleat next turn. Stop it.',pre:()=>compilable('ai').length>0,ok:()=>compilable('ai').length===0},
+ block:{t:'BLOCK THE COMPLEAT',d:'The machine is set to compleat next turn. Stop it.',pre:()=>compilable('ai').length>0,ok:()=>compilable('ai').length===0},
  sweep:{t:'TOTAL CONTROL',d:'Lead the machine in all three lines.',pre:()=>[0,1,2].some(li=>total(li,'me')<=total(li,'ai')),ok:()=>[0,1,2].every(li=>total(li,'me')>total(li,'ai'))},
- setup:{t:'ARM THE COMPILE',d:'End your turn ready to compile: 10 or more in a line, and ahead there.',pre:()=>compilable('me').length===0,ok:()=>{const n=S.noCompile.me;S.noCompile.me=false;const r=compilable('me').length>0;S.noCompile.me=n;return r}},
+ setup:{t:'ARM THE COMPLEAT',d:'End your turn ready to compleat: 10 or more in a line, and ahead there.',pre:()=>compilable('me').length===0,ok:()=>{const n=S.noCompile.me;S.noCompile.me=false;const r=compilable('me').length>0;S.noCompile.me=n;return r}},
  purge:{t:'PURGE',d:'Leave the machine with no face-up cards on the table.',pre:()=>boardCards((c,li,w)=>w==='ai'&&c.up).length>0,ok:()=>boardCards((c,li,w)=>w==='ai'&&c.up).length===0}};
 async function solve(json,goal,cap=600){const base=stateFrom(json);const sd0=seed;seed=777;try{return await solve2(base,goal,cap)}finally{seed=sd0}}
 async function solve2(base,goal,cap){const G=GOALS[goal];const sv=S;S=base;const pre=G.pre();const moves=legalMoves('me');S=sv;if(!pre)return null;
@@ -6331,7 +6331,7 @@ const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new S
   if(q.kind==='action')V.setStatus('go')},
  openRearr(q){const slots=$('raslots');let names=[...q.names],pick=null;$('rah').textContent=q.target==='me'?'REARRANGE YOUR DIRECTIVES':'REARRANGE '+OPN()+' DIRECTIVES';
   const draw=()=>{slots.innerHTML='';names.forEach((n,i)=>{const p=S.p[q.target].protos.find(x=>x.name===n);const d=document.createElement('div');d.className='slot'+(pick===i?' pk':'')+(p.compiled?' done':'');
-   d.innerHTML=`<small>LINE ${i+1}</small><span class="gl" style="color:${PRO[n].c}">${PRO[n].g}</span>${PRO[n].nm}${p.compiled?'<br><small>COMPILED</small>':''}`;
+   d.innerHTML=`<small>LINE ${i+1}</small><span class="gl" style="color:${PRO[n].c}">${PRO[n].g}</span>${PRO[n].nm}${p.compiled?'<br><small>COMPLEAT</small>':''}`;
    d.onclick=()=>{SFX.flip();if(pick==null)pick=i;else{[names[pick],names[i]]=[names[i],names[pick]];pick=null}draw()};slots.appendChild(d)})};
   draw();$('rearr').classList.add('on');$('raok').onclick=()=>{$('rearr').classList.remove('on');this.finish(names)};$('rano').onclick=()=>{$('rearr').classList.remove('on');this.finish(q.names)}},
  overlay(id,ms){return new Promise(r=>{const o=$(id);o.classList.add('on');let done=false;const end=()=>{if(done)return;done=true;o.classList.remove('on');o.onclick=null;r()};o.onclick=end;setTimeout(end,ms)})},
@@ -6379,7 +6379,7 @@ $('logp').onclick=()=>$('logp').classList.remove('on');
 // ===== boot =====
 let PICK=['FIRE','WATER','LIGHT'];try{const s=JSON.parse(localStorage.getItem('c75pick')||'null');if(Array.isArray(s)&&s.length===3&&s.every(p=>ALLP.includes(p)))PICK=s}catch(e){}
 const HDR={FIRE:'overload',LIGHT:'scan',DARKNESS:'blackout',METAL:'shield',DEATH:'terminate',PLAGUE:'contagion',GRAVITY:'magnetism',LIFE:'replicate',PSYCHIC:'intercept',WATER:'recirculate',SPEED:'accelerate',SPIRIT:'resonance'};
-function genHdr(p,on){const P=PRO[p];return `<div class="genhdr" style="--pc:${P.c}"><div class="gh-art">${artSVG(p,on?4:1)}</div><div class="gh-name">${P.nm}</div><div class="gh-bot"><small>DIRECTIVE</small><b>${on?'COMPLETE':'PENDING'}</b><i class="gh-dot${on?' on':''}"></i></div></div>`}
+function genHdr(p,on){const P=PRO[p];return `<div class="genhdr" style="--pc:${P.c}"><div class="gh-art">${artSVG(p,on?4:1)}</div><div class="gh-name">${P.nm}</div><div class="gh-bot"><small>DIRECTIVE</small><b>${on?'COMPLEAT':'PENDING'}</b><i class="gh-dot${on?' on':''}"></i></div></div>`}
 const KW={DARKNESS:'FLIP · SHIFT · PLAY',DEATH:'DELETE · DRAW',FIRE:'DISCARD · DRAW · FLIP',GRAVITY:'SHIFT · FLIP · DRAW',LIFE:'PLAY · FLIP · DRAW',LIGHT:'REVEAL · DRAW · FLIP',METAL:'FLIP · DRAW · DELETE',PLAGUE:'DISCARD · DRAW · FLIP',PSYCHIC:'REVEAL · DRAW',WATER:'RETURN · TAKE · DRAW',SPEED:'PLAY · SHIFT · DRAW',SPIRIT:'FLIP · DRAW · SHIFT'};
 function hdrHTML(p,on){const h=HDR[p];return h?`<img src="art/${h}_hdr${on?1:0}.jpg" alt="${PRO[p].nm}" draggable="false">`:genHdr(p,on)}
 function drawPick(){const g=$('pick');if(!g.children.length)for(const p of ALLP){const d=document.createElement('div');d.className='ptile';d.dataset.p=p;d.style.setProperty('--pc',PRO[p].c);
