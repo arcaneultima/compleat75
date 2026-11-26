@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="7">
+<meta name="c75-build" content="8">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -1274,7 +1274,7 @@ async function compileLine(w,li){const pr=S.p[w].protos[li];const was=pr.compile
  await V.compileFx(li,w);const cs=[...S.lines[li].me,...S.lines[li].ai];
  for(const c of cs){c.up=true;S.p[c.owner].discard.push(c)}S.lines[li].me=[];S.lines[li].ai=[];await V.render();
  if(was){const od=S.p[OPP[w]];if(!od.deck.length&&od.discard.length&&RECYC())od.deck=shuffle(od.discard.splice(0));
-  if(od.deck.length){const c=od.deck.pop();S.p[w].hand.push(c);log(`${NAME[w]} take the top card of the enemy deck.`);await V.render({from:{[c.id]:'odeck'}})}}
+  if(od.deck.length){const c=od.deck.pop();c.owner=w;S.p[w].hand.push(c);log(`${NAME[w]} take the top card of the enemy deck.`);await V.render({from:{[c.id]:'odeck'}});if(!S.sim)V.toast(w==='me'?'ALREADY COMPLEAT · YOU TAKE THEIR TOP CARD':'ALREADY COMPLEAT · THEY TAKE YOUR TOP CARD')}}
  else pr.compiled=true;await V.render();checkWin()}
 async function refill(w){if(typeof AU!=='undefined'&&AU.fan&&!S.sim)AU.fan();const n=HCAP()-S.p[w].hand.length;log(`${NAME[w]} refill.`);await drawCards(w,n)}
 async function rearrange(chooser,target){const cur=S.p[target].protos.map(p=>p.name);
@@ -5576,7 +5576,7 @@ const PRG={gen:0,
   return this.camTo(v,ms)},
  pan(dir){const v={...this.cam};v.x=Math.max(0,Math.min(1600-v.w,v.x+dir*v.w*.8));AU.ui();this.camTo(v,this.rm()?0:450)},
  swipe(){const st=$('proStage');let x0=null,v0=null,moved=false;st.onpointerdown=e=>{x0=e.clientX;v0={...this.cam};moved=false};
-  st.onpointermove=e=>{if(x0==null)return;const dx=e.clientX-x0;if(Math.abs(dx)>8)moved=true;if(!moved)return;const v={...v0};v.x=Math.max(0,Math.min(1600-v.w,v0.x-this.pxToWorld(dx)));this.setVB(v)};
+  st.onpointermove=e=>{if(x0==null)return;if(!(this.el&&this.el.querySelector('#pLookL'))||e.target.closest('.pb-plug,#pbCab')){x0=null;return}const dx=e.clientX-x0;if(Math.abs(dx)>8)moved=true;if(!moved)return;const v={...v0};v.x=Math.max(0,Math.min(1600-v.w,v0.x-this.pxToWorld(dx)));this.setVB(v)};
   st.onpointerup=st.onpointercancel=()=>{x0=null};st.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true)},
  secHand(){const h=this.el&&this.el.querySelector('#paSec');if(!h)return;let n=0;clearInterval(this._sec);this._sec=setInterval(()=>{if(!h.isConnected){clearInterval(this._sec);return}n++;h.setAttribute('transform',`rotate(${n*6} 960 330)`)},1000)},
  HOTS:{door:[112,236,300,640,'Front door'],window:[500,212,340,420,'Window'],tv:[836,580,200,316,'Television'],radio:[1180,470,120,100,'Radio'],phone:[1080,668,170,110,'Telephone'],paper:[600,760,190,100,'Newspaper'],desk:[1260,600,310,290,'Desk'],parcel:[176,790,190,100,'Package']},
@@ -6376,6 +6376,15 @@ const PWA={b:+((document.querySelector('meta[name="c75-build"]')||{}).content||0
     r.innerHTML=`<button class="ghost2 pro-opt" id="updChk">CHECK FOR UPDATES</button><small>Game build ${PWA.b} · Web app</small>`;const done=box.querySelector('[data-k="x"]');box.insertBefore(r,done);
     r.querySelector('#updChk').onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}PWA.check(1,1)}};add();new MutationObserver(add).observe(o,{childList:true})}}};
 PWA.init();
+// iPhone: Safari ignores the no-zoom setting, and once zoomed the board (which takes over touch gestures) can't be pinched
+// back out. Block pinch and double-tap zoom, and if a zoom happens anyway, snap back to normal size.
+if(PWA.ios&&!window.C75){for(const t of['gesturestart','gesturechange','gestureend'])document.addEventListener(t,e=>e.preventDefault(),{passive:false});
+ {const st=document.createElement('style');st.textContent='*{touch-action:manipulation}';document.head.appendChild(st)}
+ const vp=document.querySelector('meta[name=viewport]'),base=vp?vp.content:'';
+ PWA.unzoom=()=>{if(!vp)return;vp.content=base.replace('initial-scale=1','initial-scale=1.0').replace('maximum-scale=1','maximum-scale=1.0');setTimeout(()=>{vp.content=base;try{window.scrollTo(0,0)}catch(e){}},300)};
+ const chk=()=>{const v=window.visualViewport,a=document.activeElement;if(v&&v.scale>1.02&&!(a&&a.matches&&a.matches('input,textarea')))PWA.unzoom()};
+ if(window.visualViewport)visualViewport.addEventListener('resize',()=>{clearTimeout(PWA.zt);PWA.zt=setTimeout(chk,250)});
+ addEventListener('orientationchange',()=>setTimeout(PWA.unzoom,350));document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(chk,300)});document.addEventListener('focusout',()=>setTimeout(chk,250))}
 // ---------- LEADERBOARD: everyone's Field Operations standing this season, shared across Android and the web app ----------
 // Scores live in a small Supabase table. Each device has a random id and secret; the database only lets the device that
 // created a row change it. Points: (rank-1)*3 + intel below Rank 100, then 297 + OMEGA score. Ties go to whoever got there first.
@@ -6456,6 +6465,11 @@ setTimeout(()=>LB.push(),5000);
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:8,d:'2026-11-26',t:'Tester fixes',i:[
+  ['FIX','A card you take with a second compleat is really yours now: you control what it does, and it can no longer be returned to their hand as their card.'],
+  ['NEW','A second compleat on an already compleated directive now says so, and shows which side took a card.'],
+  ['FIX','iPhone: the screen can no longer get stuck zoomed in. If it zooms, it snaps back to normal size.'],
+  ['FIX','In the apartment, dragging while you plug in the cables no longer slides the room off screen.']]},
  {b:7,d:'2026-11-26',t:'Leaderboard',i:[
   ['NEW','Leaderboard in Field Operations: see where everyone stands this season, on Android and iPhone.'],
   ['NEW','Tap a player on the leaderboard to see their record, story progress and most played directives.'],
