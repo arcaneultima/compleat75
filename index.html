@@ -4,7 +4,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0a08">
 <title>COMPLEAT</title>
-<link rel="icon" href="icon192.png"><link rel="apple-touch-icon" href="icon512.png">
+<link rel="icon" href="icon192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
+<meta name="c75-build" content="5">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -3759,7 +3763,7 @@ function foIkePort(){return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/
  <text x="50" y="92" text-anchor="middle" font-family="Oswald,Impact" font-weight="700" font-size="14" letter-spacing="4" fill="#ffd23a">IKE</text></svg>`}
 {const ps=portraitSVG;portraitSVG=function(id,pal){const s=String(id);let m;if((m=/^fos(\d+)$/.exec(s)))return foSealPort(+m[1]);if(s==='fo-ike')return foIkePort();if(s==='fo-collin'||s==='fo-'+FO_COLLIN.id)return foCollinPort();return ps(id,pal)}}
 // ----- Collin: the trickster. Same odds as Ike, same CHEDDAR exemption, every match under one of his rules -----
-const FO_COLLIN={id:'FO-102',cn:'COLLIN',pf:'Trickster',p:0.01,
+const FO_COLLIN={id:'FO-102',cn:'COLLIN',pf:'Trickster',p:0.02,
  rules:['lightsout','dying','sudden','distort','overdrive','jam','lockdown','breach','deaddrop','rapid','open','short','high','reverse','restricted','residual','blackbox','pressure','switchboard','copycat','stacked','housekey','sleeve'],
  say:{lightsout:'Lights off. No peeking.',dying:'The finish line keeps moving. Keep up.',sudden:'First one across wins. That is the whole rule.',distort:'Things slide around in here. Do not trust a line.',overdrive:'Bigger hands, double plays. More mess.',jam:'One line breaks every round. Guess which.',lockdown:'You get one lock. Use it before I use mine.',breach:'Delete something and something of yours flips. Fun, right?',deaddrop:'I already dealt some cards onto the table. Some are yours.',rapid:'Three cards. That is all you get.',open:'Show me yours, I will show you mine.',short:'Eight is enough tonight.',high:'Twelve. Ten was too easy.',reverse:'I shuffled your headers. You are welcome.',restricted:'Face-down only where you are losing. House policy.',residual:'The middle line pays out. If you can hold it.',blackbox:'Your first card? I picked it.',pressure:'One line is cheap each round. Watch which.',switchboard:'You can swap two headers once. So can I.',copycat:'Nice deck. Mine now.',stacked:'Every line has its own price tonight.',housekey:'I will hold the key. You do not mind.',sleeve:'Two extra cards? No idea where those came from.'},
  trick:{housekey:'He is holding the Override Key.',sleeve:'He opens with two extra cards.'},
@@ -5516,7 +5520,7 @@ const PRG={gen:0,
  rm(){return typeof RM==='function'&&RM()},
  open(cls){this.close();const o=document.createElement('div');o.id='pro';o.className='pro '+(cls||'');o.innerHTML=`<div class="pro-stage" id="proStage"></div><div class="pro-cap" id="proCap" aria-live="polite"></div>
   <div class="pro-ui" id="proUI"></div><button class="pro-pause" id="proPause" aria-label="Pause">II</button><div class="pro-fade" id="proFade"></div>`;$('app').appendChild(o);this.el=o;
-  $('proPause').onclick=e=>{e.stopPropagation();AU.ui();this.pause()};if(!this.rm())o.animate([{opacity:0},{opacity:1}],{duration:600});return o},
+  $('proPause').onclick=e=>{e.stopPropagation();AU.ui();this.pause()};if(!this.rm())for(const k of['proStage','proCap','proUI'])o.querySelector('#'+k).animate([{opacity:0},{opacity:1}],{duration:600});return o},
  close(){this.stopKnock();this.clearAssist();PS.ambience(false);PS.dial(false);if(this.el){const e=this.el;this.el=null;e.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id'));e.remove()}},
  cap(t,ms=2200){const c=$('proCap');if(!c)return;c.textContent=t;c.classList.add('on');clearTimeout(this._capT);this._capT=setTimeout(()=>c.classList.remove('on'),ms)},
  ui(html){const u=$('proUI');if(u)u.innerHTML=html||'';return u},
@@ -5535,14 +5539,13 @@ const PRG={gen:0,
  // ---------- A00 title ----------
  title(){const s=OB.st();const prog=s.complete||s.stage!=='title'||PROF.d.stats&&PROF.d.stats.games>0;PS.stopAll();
   const o=document.createElement('div');o.id='splash';o.className='pro-title';
-  o.innerHTML=`<div class="pt-in"><div class="logo pt-logo">COMPLEAT</div><div class="pt-b"><button class="big-btn" id="ptGo">${prog?'CONTINUE':'START'}</button><button class="lnk" id="ptSet">SETTINGS</button></div></div>`;
+  o.innerHTML=`<div class="pt-in"><div class="logo pt-logo">COMPLEAT</div><div class="pt-b"><button class="big-btn" id="ptGo">${prog?'CONTINUE':'START'}</button></div></div>`;
   $('app').appendChild(o);const L=o.querySelector('.pt-logo'),B=o.querySelector('.pt-b');
   if(!this.rm()){L.animate([{opacity:0,transform:'scale(1.35) rotate(-3deg)'},{opacity:1,transform:'none'}],{duration:220,delay:500,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'backwards'});B.animate([{opacity:0},{opacity:1}],{duration:400,delay:900,fill:'backwards'})}
   setTimeout(()=>{try{AU.stamp&&SX.ok()&&AU.stamp()}catch(e){}},520);
   const unlock=()=>{AU.init();try{AU.ctx&&AU.ctx.resume&&AU.ctx.resume()}catch(e){}};o.addEventListener('pointerdown',unlock,{once:true,capture:true});
   $('ptGo').onclick=()=>{unlock();AU.ui();const go=()=>{o.remove();if(OB.st().complete){if(typeof MUS!=='undefined')MUS.play('ambient');HUB.show('home')}else this.resume()};if(this.rm()){go();return}
-   o.animate([{opacity:1},{opacity:0}],{duration:450,fill:'forwards'}).onfinish=go};
-  $('ptSet').onclick=()=>{unlock();AU.ui();this.settings()}},
+   o.querySelector('.pt-in').animate([{opacity:1},{opacity:0}],{duration:450,fill:'forwards'}).onfinish=go}},
  settings(){const d=PROF.d;d.opt=d.opt||{};const o=document.createElement('div');o.className='evm';const draw=()=>{o.innerHTML=`<div class="evm-b"><small>SETTINGS</small><b>Options</b>
   <button class="ghost2 pro-opt" data-k="snd">SOUND: ${['OFF','EFFECTS ONLY','ALL'][AU.mode]}</button><button class="ghost2 pro-opt" data-k="it">TEXT: ${d.opt.it?'INSTANT':'TYPED'}</button><button class="ghost2 pro-opt" data-k="rm">REDUCED MOTION: ${d.opt.rm?'ON':'OFF'}</button>
   <button class="big-btn wide sm" data-k="x">DONE</button></div>`;o.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;AU.ui();if(k==='x'){o.remove();return}
@@ -6348,6 +6351,31 @@ if(UPD.has())setTimeout(()=>{try{C75.ok()}catch(e){}},1500);
 .upd-bar b{display:block;font:700 12px var(--disp);letter-spacing:.14em;color:#ffd58a}.upd-bar small{display:block;margin-top:2px;color:#a89c7c}
 .upd-b{display:flex;gap:8px;flex:none}.upd-b button{min-height:36px;padding:0 12px;font-size:11px}
 .upd-row{display:flex;flex-direction:column;gap:4px;align-items:stretch}.upd-row small{font:10px var(--mono);color:#8d8670;text-align:center}`;document.head.appendChild(st)}
+// ---------- web app (iPhone / browser) ----------
+// The Android app updates itself through C75. In a browser the page caches itself through sw.js, checks version.json for a
+// newer build when it opens or comes back to the front, and offers a restart. On an iPhone that isn't running it from the
+// home screen yet, it says how to install it.
+const PWA={b:+((document.querySelector('meta[name="c75-build"]')||{}).content||0),last:0,shown:0,
+ on:!window.C75&&'serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'),
+ ios:/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+ solo:()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches,
+ async sw(){try{return(await navigator.serviceWorker.ready).active}catch(e){return null}},
+ async check(force,manual){if(!this.on)return;const now=Date.now();if(!force&&now-this.last<60000)return;this.last=now;
+  try{const r=await fetch('version.json?t='+now,{cache:'no-store'});if(!r.ok)throw 0;const v=await r.json();const w=await this.sw();if(w)w.postMessage({t:'files',files:v.files||{}});
+   if(v.build>this.b){if(!this.shown||manual){this.shown=1;this.offer(v.build,v.notes)}}else if(manual)toast2(`You're on the latest build (${this.b}).`)}
+  catch(e){if(manual)toast2('Could not reach the update server.')}},
+ offer(b,notes){const show=()=>UPD.bar(`<b>UPDATE READY · BUILD ${b}</b><small>${notes?esc(notes):'Restart to load it. Your progress stays.'}</small>`,[['RESTART NOW',()=>{try{PROF.save()}catch(e){}location.reload()},'big-btn sm'],['LATER',o=>o.remove()]]);
+  if(UPD.inMatch()){const t=setInterval(()=>{if(!UPD.inMatch()){clearInterval(t);show()}},3000)}else show()},
+ hint(){if(!this.ios||this.solo())return;let k=0;try{k=+localStorage.getItem('c75_pwahint')||0}catch(e){}if(Date.now()-k<3*864e5)return;
+  setTimeout(()=>{if(document.querySelector('.upd-bar'))return;UPD.bar('<b>PLAY IT LIKE AN APP</b><small>Tap the Share button, then <b style="display:inline;letter-spacing:0;color:#e9dfc6">Add to Home Screen</b>. It opens full screen and updates itself.</small>',[['GOT IT',o=>{try{localStorage.setItem('c75_pwahint',Date.now())}catch(e){}o.remove()},'big-btn sm']])},6000)},
+ init(){if(window.C75)return;this.hint();if(!this.on)return;navigator.serviceWorker.register('sw.js').catch(()=>{});setTimeout(()=>this.check(1),4000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)this.check()});
+  // settings: show the build and a manual check, like the Android app does
+  const st=PRG.settings.bind(PRG);PRG.settings=function(){st();const o=[...document.querySelectorAll('.evm')].pop();if(!o)return;
+   const add=()=>{const box=o.querySelector('.evm-b');if(!box||box.querySelector('#updRow'))return;const r=document.createElement('div');r.id='updRow';r.className='upd-row';
+    r.innerHTML=`<button class="ghost2 pro-opt" id="updChk">CHECK FOR UPDATES</button><small>Game build ${PWA.b} · Web app</small>`;const done=box.querySelector('[data-k="x"]');box.insertBefore(r,done);
+    r.querySelector('#updChk').onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}PWA.check(1,1)}};add();new MutationObserver(add).observe(o,{childList:true})}}};
+PWA.init();
 // ===== input / choices UI =====
 const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new Set(),
  wait(req){return new Promise(res=>{this.req=req;this.res=res;this.sel.clear();this.apply()})},
