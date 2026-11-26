@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="10">
+<meta name="c75-build" content="11">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -3512,13 +3512,13 @@ const SN={
 {const aw=ECON.award;ECON.award=function(cfg,win){if(cfg&&cfg.mode==='story'&&win&&!PROF.d.story.done[cfg.node]){const st=SN.st();st.pend={id:cfg.node,st:'win',i:0};if(cfg.node==='e7')st.resolved=1}return aw.call(ECON,cfg,win)}}
 // ----- terminal -----
 const TERM={el:null,fast:false,_tap:null,
- open(chan){this.close(true);const o=document.createElement('div');o.id='term';o.className='term'+(RM()?' rm':'');
+ open(chan){const had=!!this.el;this.close(true);const o=document.createElement('div');o.id='term';o.className='term'+(RM()?' rm':'');
   o.innerHTML=`<div class="tm-crt"><div class="tm-hd"><b id="tmCh"></b><button class="lnk tm-it" id="tmIt"></button></div><div class="tm-log" id="tmLog" aria-live="polite"></div><div class="tm-bar"><button class="lnk tm-skip" id="tmSkip">SKIP DIALOGUE</button><div class="tm-act" id="tmAct"></div></div></div><div class="tm-scan"></div>`;
   $('app').appendChild(o);this.el=o;this.fast=false;this._tap=null;this.chan(chan||'');this.itLabel();
   $('tmSkip').onclick=e=>{e.stopPropagation();AU.ui();this.fast=true;const t=this._tap;this._tap=null;t&&t()};
   $('tmIt').onclick=e=>{e.stopPropagation();const d=PROF.d;d.opt=d.opt||{};d.opt.it=d.opt.it?0:1;PROF.save();this.itLabel()};
   o.addEventListener('click',e=>{if(e.target.closest('button'))return;const t=this._tap;if(t){this._tap=null;t()}});
-  if(!RM())o.animate([{opacity:0},{opacity:1}],{duration:400});
+  if(!RM()&&!had)o.animate([{opacity:0},{opacity:1}],{duration:400});
   try{if(typeof MUS!=='undefined'&&MUS.cur&&AU.ctx){this._mus=MUS.cur;MUS.fade(MUS.cur,(MUS.lv[MUS.cur]||.5)*.35,.6)}}catch(e){}
   return this},
  itLabel(){const b=$('tmIt');if(b)b.textContent=SN.it()?'TEXT: INSTANT':'TEXT: TYPED'},
@@ -5348,7 +5348,7 @@ const PA={W:1600,H:1000,
   <g id="paClock"><circle cx="960" cy="330" r="48" fill="#3a2716"/><circle cx="960" cy="330" r="41" fill="#e8dcc0"/>
    ${[...Array(12)].map((_,i)=>{const a=i/12*Math.PI*2;return`<rect x="958.5" y="${292}" width="3" height="${i%3?6:10}" fill="#2a2a2a" transform="rotate(${i*30} 960 330)"/>`}).join('')}
    <rect x="958" y="304" width="4" height="28" rx="2" fill="#1a1a1a" transform="rotate(${(o.hr??8)*30+ (o.mi??20)/2} 960 330)"/><rect x="959" y="296" width="2.5" height="36" rx="1" fill="#1a1a1a" transform="rotate(${(o.mi??20)*6} 960 330)"/>
-   <rect id="paSec" x="959.4" y="294" width="1.2" height="44" fill="#8a2020" style="transform-origin:960px 330px"/><circle cx="960" cy="330" r="3.5" fill="#1a1a1a"/></g>
+   <rect id="paSec" x="959.4" y="294" width="1.2" height="44" fill="#8a2020"/><circle cx="960" cy="330" r="3.5" fill="#1a1a1a"/></g>
   <!-- picture -->
   <rect x="1188" y="250" width="150" height="112" fill="#3a2716"/><rect x="1198" y="260" width="130" height="92" fill="#6a7a6a"/><path d="M1198 330 Q1240 300 1270 318 T1328 306 L1328 352 L1198 352Z" fill="#3e4a32"/><circle cx="1300" cy="282" r="10" fill="#d8c79a" opacity=".7"/>
   <!-- TV console -->
@@ -5370,7 +5370,7 @@ const PA={W:1600,H:1000,
   <g id="paPhone"><rect x="1090" y="742" width="150" height="14" fill="#5a3f2a"/><rect x="1100" y="756" width="10" height="134" fill="#3a2716"/><rect x="1220" y="756" width="10" height="134" fill="#3a2716"/><rect x="1100" y="840" width="130" height="8" fill="#3a2716"/>
    <path d="M1124 742 L1132 704 L1198 704 L1206 742Z" fill="#1c1a18"/><circle cx="1165" cy="722" r="15" fill="#2c2a28" stroke="#8a8a80" stroke-width="2"/><circle cx="1165" cy="722" r="5" fill="#d8cbb0"/>
    ${o.recv?'':'<path d="M1114 700 Q1165 680 1216 700 L1210 712 Q1165 694 1120 712Z" fill="#141210"/><rect x="1108" y="696" width="20" height="14" rx="5" fill="#141210"/><rect x="1202" y="696" width="20" height="14" rx="5" fill="#141210"/>'}
-   <path d="M1206 732 q40 10 30 60 q-6 30 10 50" stroke="#141210" stroke-width="3" fill="none"/></g>
+   <rect x="1248" y="822" width="20" height="28" rx="3" fill="#d8cbb0"/><circle cx="1258" cy="836" r="5" fill="#5a4a32"/><path d="M1206 732 q40 10 30 60 q-4 26 18 42" stroke="#141210" stroke-width="3" fill="none"/><rect x="1251" y="830" width="10" height="10" rx="2" fill="#141210"/></g>
   <!-- desk + lamp + outlet + phone jack -->
   <g id="paDesk"><ellipse cx="1400" cy="902" rx="200" ry="16" fill="#000" opacity=".45" filter="url(#fSoft)"/>
    <rect x="1270" y="690" width="290" height="20" fill="#5a3f2a"/><rect x="1270" y="690" width="290" height="5" fill="#7a5a3e"/>
@@ -5441,8 +5441,9 @@ const PA={W:1600,H:1000,
   <!-- SET A: desk front -->
   <rect width="1200" height="660" fill="url(#pWall)"/><rect width="1200" height="660" fill="#000" opacity=".22"/>
   <rect y="640" width="1200" height="34" fill="#7a5a3e"/><rect y="640" width="1200" height="7" fill="#a07a54"/><rect y="674" width="1200" height="226" fill="url(#pVeneer)"/><rect y="674" width="1200" height="226" fill="#000" opacity=".15"/>
+  ${this.deskWall(st)}
   <ellipse cx="1040" cy="460" rx="420" ry="320" fill="url(#gLamp)"/><g><rect x="1034" y="430" width="12" height="214" fill="url(#gBrass)"/><path d="M966 436 L1114 436 L1090 362 L990 362Z" fill="#e8b468"/><ellipse cx="1040" cy="642" rx="54" ry="10" fill="#2a1a0e"/></g>
-  <g id="pbWallSock"><rect x="1120" y="560" width="30" height="46" rx="4" fill="#d8cbb0"/><circle cx="1135" cy="583" r="7" fill="#5a4a32"/></g>
+  
   ${box}${pc}
   ${!placed&&opened&&flap>=1?`<g class="pb-hot" id="pbLift" tabindex="0" role="button" aria-label="Computer"><rect x="480" y="300" width="300" height="200" fill="transparent"/></g>`:''}
   ${!st.poweredOn&&!st.envRead&&opened&&flap>=1?`<g class="pb-hot" id="pbEnv" tabindex="0" role="button" aria-label="Envelope"><rect x="${placed?250:740}" y="${placed?600:460}" width="70" height="46" fill="#efe6cf" transform="rotate(-8 ${placed?285:775} ${placed?623:483})"/><path d="M${placed?250:740} ${placed?600:460} l35 22 l35 -22" stroke="#b9ab88" stroke-width="2" fill="none" transform="rotate(-8 ${placed?285:775} ${placed?623:483})"/></g>`:''}
@@ -5458,13 +5459,13 @@ const PA={W:1600,H:1000,
    <rect x="360" y="190" width="130" height="64" rx="4" fill="#9a9ea4"/><rect x="360" y="190" width="130" height="64" rx="4" fill="none" stroke="#5a5e64" stroke-width="2"/><text x="425" y="216" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="15" fill="#2a2e34" letter-spacing="2">C-075</text><text x="425" y="238" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="9" fill="#3a3e44">SER. 0000075 · 117V</text>
    <g><circle cx="150" cy="420" r="26" fill="#3a3a3a"/><circle cx="150" cy="420" r="18" fill="#161616"/><path d="M150 404 v6 M138 414 l5 4 M162 414 l-5 4 M142 428 l4 -3 M158 428 l-4 -3" stroke="#aaa" stroke-width="3"/><text x="150" y="468" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="13" fill="#5a5444">KEYBOARD</text></g>
    <g><rect x="250" y="398" width="58" height="44" rx="5" fill="#161616" stroke="#3a3a3a" stroke-width="5"/><path d="M262 412 h34 M262 420 h34 M262 428 h34" stroke="#c49a52" stroke-width="2"/><text x="280" y="468" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="13" fill="#5a5444">LINE</text></g>
-   <g><rect x="380" y="392" width="90" height="56" rx="6" fill="#2a2a2a"/><rect x="394" y="404" width="62" height="32" rx="4" fill="#111"/><path d="M425 448 Q430 560 520 640" stroke="#1a1a1a" stroke-width="12" fill="none"/><text x="425" y="476" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="13" fill="#5a5444">POWER</text></g>
+   <g><rect x="380" y="392" width="90" height="56" rx="6" fill="#2a2a2a"/><rect x="394" y="404" width="62" height="32" rx="4" fill="#111"/><path d="M425 448 Q440 660 560 900" stroke="#1a1a1a" stroke-width="12" fill="none"/><text x="425" y="476" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="13" fill="#5a5444">POWER</text></g>
    <rect x="80" y="520" width="440" height="8" fill="#000" opacity=".15"/>
    <circle cx="150" cy="420" r="46" fill="none" stroke="#ffd58a" stroke-width="3" opacity="0" class="pb-tgt" id="pbTgtKbd"/></g>
   <!-- SET D: telephone line (x 0-600, y 900-1800) -->
   <g transform="translate(0 900)"><rect width="600" height="900" fill="url(#pWall)"/><rect width="600" height="900" fill="#000" opacity=".3"/><rect y="720" width="600" height="40" fill="#3a2716"/><rect y="760" width="600" height="140" fill="url(#pFloor)"/>
    <ellipse cx="200" cy="300" rx="300" ry="260" fill="url(#gLamp)" opacity=".5"/>
-   <path d="M600 520 Q520 520 460 560 Q420 600 400 650" stroke="#2a2a2a" stroke-width="6" fill="none"/><text x="560" y="500" text-anchor="end" font-family="'Share Tech Mono',monospace" font-size="13" fill="#3a2e1e">TO TELEPHONE</text>
+   
    <g id="pbJack"><rect x="160" y="470" width="110" height="110" rx="55" fill="#cfc2a6"/><circle cx="215" cy="525" r="40" fill="#b8aa8a"/><circle cx="215" cy="525" r="26" fill="#3a2e1e"/>${[0,1,2,3].map(i=>{const a=i*Math.PI/2+Math.PI/4;return`<circle cx="${(215+Math.cos(a)*14).toFixed(1)}" cy="${(525+Math.sin(a)*14).toFixed(1)}" r="4" fill="#d8c79a"/>`}).join('')}</g>
    <circle cx="215" cy="525" r="56" fill="none" stroke="#ffd58a" stroke-width="3" opacity="0" class="pb-tgt" id="pbTgtLine"/></g>
   </svg>`},
@@ -5472,6 +5473,7 @@ const PA={W:1600,H:1000,
   <rect x="90" y="42" width="120" height="14" fill="url(#gCream)" transform="skewX(-40) translate(40 0)"/><rect x="216" y="44" width="60" height="10" rx="3" fill="#2a2a2a" transform="skewX(-40) translate(40 0)"/></g>`},
  // C-075 front view on the desk (world coordinates in SET A)
  pc(st,front){const on=!!st.poweredOn;return`<g id="pbPC"><ellipse cx="600" cy="644" rx="250" ry="22" fill="#000" opacity=".55" filter="url(#fShadow)"/>
+   ${st.keyboardConnected?'<path d="M430 690 Q384 640 456 596" stroke="#3a3a3a" stroke-width="6" fill="none"/>':'<path d="M420 690 Q360 700 330 660 Q300 620 340 600" stroke="#3a3a3a" stroke-width="6" fill="none"/><rect x="322" y="584" width="30" height="26" rx="8" fill="#2a2a2a"/>'}
    <rect x="430" y="300" width="340" height="340" rx="26" fill="url(#gCream)"/><rect x="430" y="300" width="340" height="16" rx="8" fill="#efe7d4" opacity=".6"/>
    <rect x="462" y="330" width="224" height="180" rx="22" fill="#2a2620"/><rect x="474" y="342" width="200" height="156" rx="18" fill="${on?'url(#gCRTon)':'url(#gCRT)'}" id="pbScreen"/>
    <rect x="474" y="342" width="200" height="156" rx="18" fill="#b6d4a1" opacity="0" id="pbBloom"/><rect x="474" y="419" width="200" height="2" fill="#d8ffd0" opacity="0" id="pbLine"/>
@@ -5483,9 +5485,13 @@ const PA={W:1600,H:1000,
    <rect x="440" y="640" width="320" height="10" rx="4" fill="#9a8e72"/>
    <g><rect x="380" y="670" width="440" height="86" rx="10" fill="url(#gCream)"/><rect x="380" y="670" width="440" height="12" rx="6" fill="#efe7d4" opacity=".5"/>
     ${[0,1,2,3].map(r=>[...Array(13-(r%2))].map((_,i)=>`<rect x="${396+i*32+(r%2)*16}" y="${688+r*16}" width="26" height="12" rx="2" fill="#4a4436"/>`).join('')).join('')}</g>
-   ${st.keyboardConnected?'<path d="M420 680 Q380 620 440 560" stroke="#3a3a3a" stroke-width="6" fill="none"/>':'<path d="M420 680 Q360 700 330 660 Q300 620 340 600" stroke="#3a3a3a" stroke-width="6" fill="none"/><rect x="322" y="584" width="30" height="26" rx="8" fill="#2a2a2a"/>'}
-   ${st.powerConnected?'<path d="M770 600 Q900 640 1100 600" stroke="#1a1a1a" stroke-width="7" fill="none"/>':'<path d="M770 600 Q840 640 880 660" stroke="#1a1a1a" stroke-width="7" fill="none"/><rect x="872" y="650" width="30" height="20" rx="4" fill="#2a2a2a"/>'}
-   ${st.lineConnected?'<path d="M770 580 Q960 560 1120 583" stroke="#2a2a2a" stroke-width="4" fill="none"/>':'<path d="M770 580 Q820 610 820 650" stroke="#2a2a2a" stroke-width="4" fill="none"/><rect x="806" y="646" width="26" height="16" rx="3" fill="#1a1a1a"/>'}</g>`}};
+</g>`},
+ // wall jack, power outlet and the cables that run from the back of the computer to them
+ deskWall(st){if(!st.hardwarePlaced)return`<g id="pbWallSock"><rect x="1120" y="560" width="30" height="46" rx="4" fill="#d8cbb0"/><circle cx="1135" cy="583" r="7" fill="#5a4a32"/></g><g id="pbWallOut"><rect x="1160" y="552" width="32" height="60" rx="4" fill="#d8cbb0"/><rect x="1168" y="562" width="3" height="9" fill="#3a2a1a"/><rect x="1180" y="562" width="3" height="9" fill="#3a2a1a"/><rect x="1168" y="587" width="3" height="9" fill="#3a2a1a"/><rect x="1180" y="587" width="3" height="9" fill="#3a2a1a"/></g>`;
+  return`<g id="pbWallSock"><rect x="1120" y="560" width="30" height="46" rx="4" fill="#d8cbb0"/><circle cx="1135" cy="583" r="7" fill="#5a4a32"/></g>
+   <g id="pbWallOut"><rect x="1160" y="552" width="32" height="60" rx="4" fill="#d8cbb0"/><rect x="1168" y="562" width="3" height="9" fill="#3a2a1a"/><rect x="1180" y="562" width="3" height="9" fill="#3a2a1a"/><rect x="1168" y="587" width="3" height="9" fill="#3a2a1a"/><rect x="1180" y="587" width="3" height="9" fill="#3a2a1a"/></g>
+   ${st.powerConnected?'<path d="M760 600 Q980 668 1176 602" stroke="#1a1a1a" stroke-width="7" fill="none"/><rect x="1165" y="583" width="22" height="20" rx="4" fill="#2a2a2a"/>':'<path d="M760 600 Q840 640 880 660" stroke="#1a1a1a" stroke-width="7" fill="none"/><rect x="872" y="650" width="30" height="20" rx="4" fill="#2a2a2a"/>'}
+   ${st.lineConnected?'<path d="M760 580 Q960 548 1135 592" stroke="#2a2a2a" stroke-width="4" fill="none"/><rect x="1128" y="576" width="14" height="16" rx="3" fill="#cfc2a6"/>':'<path d="M760 580 Q820 610 820 650" stroke="#2a2a2a" stroke-width="4" fill="none"/><rect x="806" y="646" width="26" height="16" rx="3" fill="#1a1a1a"/>'}`}};
 // ===== C75-NAR-00 · PROLOGUE & TRAINING (title > apartment > parcel > assembly > boot > Q > training > codename > assignment > HQ) =====
 const OB={
  def(){return{v:2,stage:'title',parcelTaken:0,parcelOpened:0,hardwarePlaced:0,powerConnected:0,keyboardConnected:0,lineConnected:0,poweredOn:0,introBypassed:0,doorOpened:0,
@@ -5685,14 +5691,21 @@ const PRG={gen:0,
   plug.onpointercancel=()=>{pid=null;dragging=false;back()};
   const pickTgt=()=>{if(sel){sel=false;success()}};tgt.onclick=e=>{e.stopPropagation();pickTgt()};
   plug.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sel=!sel;plug.classList.toggle('sel',sel);AU.ui()}};tgt.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pickTgt()}}},
- async power(){const s=OB.st();if(s.poweredOn||this.busy)return;this.busy=true;this.clearAssist();PS.sw();OB.set({poweredOn:1});this.cap('[Computer starts]',2000);
+ async power(){const s=OB.st();if(s.poweredOn||this.busy)return;this.busy=true;this.clearAssist();this.ui('');PS.sw();OB.set({poweredOn:1});this.cap('[Computer starts]',2000);
   const sv=this.svg();const sw=sv.querySelector('#pbSwitch rect:last-child');sw&&sw.setAttribute('y','550');const lamp=sv.querySelector('#pbLamp');lamp&&lamp.setAttribute('fill','#7dff8a');PS.hum(true);
-  const line=sv.querySelector('#pbLine'),bloom=sv.querySelector('#pbBloom');
-  if(!this.rm()){await zz(260);line&&line.animate([{opacity:0,transform:'scaleX(.1)'},{opacity:1,transform:'scaleX(1)'}],{duration:260,fill:'forwards'});await zz(260);
-   bloom&&bloom.animate([{opacity:0},{opacity:.22}],{duration:1000,fill:'forwards'});line&&line.animate([{opacity:1},{opacity:0}],{duration:700,fill:'forwards'});await zz(900);
-   await this.camTo(this.fit(574,420,200,156,[0,0,1200,900]),800)}else{bloom&&bloom.setAttribute('opacity','.2');await zz(150)}
+  const line=sv.querySelector('#pbLine'),bloom=sv.querySelector('#pbBloom');for(const e of[line,bloom])if(e){e.style.transformBox='fill-box';e.style.transformOrigin='50% 50%'}
+  if(!this.rm()){await zz(260);
+   line&&line.animate([{opacity:0,transform:'scaleX(.02)'},{opacity:1,transform:'scaleX(1)'}],{duration:240,easing:'cubic-bezier(.2,.8,.3,1)',fill:'forwards'});await zz(320);
+   bloom&&bloom.animate([{opacity:.9,transform:'scaleY(.015)'},{opacity:.55,transform:'scaleY(1)',offset:.45},{opacity:.22,transform:'scaleY(1)'}],{duration:950,easing:'ease-out',fill:'forwards'});
+   line&&line.animate([{opacity:1},{opacity:0}],{duration:260,fill:'forwards'});await zz(650);
+   // push into the glass until the screen fills the whole view
+   const st=$('proStage'),a=st.clientWidth/Math.max(1,st.clientHeight),h=Math.min(146,186/a),w=h*a;
+   const br=document.createElement('div');br.className='pro-bridge';br.style.opacity='0';$('app').appendChild(br);
+   const cam=this.camTo({x:574-w/2,y:420-h/2,w,h},1050);await zz(620);await br.animate([{opacity:0},{opacity:1}],{duration:430,easing:'ease-in',fill:'forwards'}).finished;await cam;
+   this._bridge=br}else{bloom&&bloom.setAttribute('opacity','.2');await zz(150)}
   this.busy=false;this.toTerminal()},
- toTerminal(){OB.set({stage:'boot'});this.close();this.boot()},
+ toTerminal(){OB.set({stage:'boot'});this.close();this.boot();const br=this._bridge;this._bridge=null;
+  if(br)setTimeout(()=>br.animate([{opacity:1},{opacity:0}],{duration:380,easing:'ease-out',fill:'forwards'}).finished.then(()=>br.remove()),450)},
  // ---------- C01/C02 boot and first contact ----------
  async boot(){const g=++this.gen;const s=OB.st();PS.hum(true);if(typeof MUS!=='undefined')MUS.play('none');HUB.hide&&HUB.hide();
   TERM.open('C-075 / SYSTEM TERMINAL');this.termPause();const T=TERM;const resumeAt=s.dialogueBeat||0;
@@ -5787,6 +5800,8 @@ const PRG={gen:0,
 const PQ48='I will assume you are familiar with the system. I suggest you make use of the exercise if that proves not to be the case.',PQ49='There is another matter to settle before we proceed.';
 // keep the hit layer locked to the camera
 {const sv=PRG.setVB.bind(PRG);PRG.setVB=function(v){sv(v);const g=this.el&&this.el.querySelector('#paHits');if(g)g.setAttribute('viewBox',`${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`)}}
+
+{const st=document.createElement('style');st.textContent='.pro-bridge{position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,#06150b,#010603 80%)}';document.head.appendChild(st)}
 // ===== C75-NAR-00 · training coach (lessons L01-L07, prompts Q34-Q38) + integration =====
 const PQL={
  open:['This is a simulation. No one is connected to you through this exercise except me. Take your time.','What you are looking at is a way of issuing instructions to a contested system. We call the instruction sets Directives.'],
@@ -6484,6 +6499,11 @@ setTimeout(()=>LB.push(),5000);
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:11,d:'2026-11-26',t:'Apartment fixes',i:[
+  ['FIX','Switching on the computer no longer flashes the game board before the terminal appears.'],
+  ['CHANGE','The computer screen now turns on from the middle like an old monitor, and the camera pushes into the glass before the terminal takes over.'],
+  ['FIX','Cables in the apartment and the plug-in steps now run to real sockets. No more wires hanging in the air.'],
+  ['FIX','The clock\'s second hand stays on the clock face.']]},
  {b:10,d:'2026-11-26',t:'Key off by default',i:[
   ['CHANGE','The Override Key is now off by default. Turn it on in Settings if you want it. Directives stay where they start unless a card rearranges them.'],
   ['CHANGE','Missions that asked you to seize the Override Key ask for a 2-line lead instead while the key is off.'],
