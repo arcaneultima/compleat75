@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="5">
+<meta name="c75-build" content="6">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -6376,6 +6376,82 @@ const PWA={b:+((document.querySelector('meta[name="c75-build"]')||{}).content||0
     r.innerHTML=`<button class="ghost2 pro-opt" id="updChk">CHECK FOR UPDATES</button><small>Game build ${PWA.b} · Web app</small>`;const done=box.querySelector('[data-k="x"]');box.insertBefore(r,done);
     r.querySelector('#updChk').onclick=e=>{e.stopPropagation();try{AU.ui()}catch(x){}PWA.check(1,1)}};add();new MutationObserver(add).observe(o,{childList:true})}}};
 PWA.init();
+// ---------- LEADERBOARD: everyone's Field Operations standing this season, shared across Android and the web app ----------
+// Scores live in a small Supabase table. Each device has a random id and secret; the database only lets the device that
+// created a row change it. Points: (rank-1)*3 + intel below Rank 100, then 297 + OMEGA score. Ties go to whoever got there first.
+const LB={url:'',key:'',busy:0,last:0,timer:0,
+ on(){return!!(this.url&&this.key)&&typeof fetch==='function'},
+ hdr(){return{apikey:this.key,Authorization:'Bearer '+this.key,'Content-Type':'application/json'}},
+ me(){const d=PROF.d;if(!d.lb||!d.lb.id){const h=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return[...a].map(x=>x.toString(16).padStart(2,'0')).join('')},x=h(16);
+   d.lb={id:`${x.slice(0,8)}-${x.slice(8,12)}-4${x.slice(13,16)}-a${x.slice(17,20)}-${x.slice(20,32)}`,sec:h(24)};PROF.save()}return d.lb},
+ plat(){return window.C75?'android':(typeof PWA!=='undefined'&&PWA.ios)?'iphone':'web'},
+ pts(r){return r.rank>=100?297+(r.omega||0):(r.rank-1)*3+(r.intel||0)},
+ row(){const f=FO.st(),d=PROF.d,m=this.me();return{p_id:m.id,p_secret:m.sec,p_name:(d.name||'OPERATOR').slice(0,12),p_title:(d.eq&&d.eq.title)||'',p_port:(d.eq&&d.eq.port)||'',p_bord:(d.eq&&d.eq.bord)||'',
+  p_season:f.season,p_rank:f.rank,p_intel:f.intel,p_omega:f.omega,p_lvl:d.lvl||1,p_wins:(d.stats&&d.stats.w)||0,p_losses:(d.stats&&d.stats.l)||0,
+  p_top:this.top().join(','),p_story:this.story(),p_platform:this.plat()}},
+ top(){const m=PROF.d.mast||{};return Object.keys(m).filter(k=>PRO[k]&&m[k]>0).sort((a,b)=>m[b]-m[a]).slice(0,3)},
+ story(){const dn=PROF.d.story&&PROF.d.story.done||{};return STORY.filter(s=>dn[s.id]).length},
+ sect(n){if(n>=STORY.length)return'CLEARED';const s=STORY[Math.min(n,STORY.length-1)];return(SECT[s.sec]&&SECT[s.sec].n)||''},
+ async push(){if(!this.on())return false;try{FO.check();const r=await fetch(this.url+'/rest/v1/rpc/fo_submit',{method:'POST',headers:this.hdr(),body:JSON.stringify(this.row())});this.ok=r.ok;return r.ok}catch(e){this.ok=false;return false}},
+ soon(){clearTimeout(this.pt);this.pt=setTimeout(()=>this.push(),1200)},
+ async list(season){const q=`season=eq.${season}&select=id,name,title,port,bord,rank,intel,omega,points,lvl,wins,losses,top,story,platform,updated_at&order=points.desc,updated_at.asc&limit=200`;
+  const r=await fetch(`${this.url}/rest/v1/fo_board?${q}`,{headers:this.hdr(),cache:'no-store'});if(!r.ok)throw new Error('http '+r.status);const a=await r.json();
+  try{localStorage.setItem('c75_lb',JSON.stringify({season,t:Date.now(),a}))}catch(e){}return a},
+ cached(season){try{const c=JSON.parse(localStorage.getItem('c75_lb')||'null');return c&&c.season===season?c:null}catch(e){return null}},
+ ago(t){const s=Math.max(0,(Date.now()-new Date(t).getTime())/1e3);return s<90?'just now':s<5400?Math.round(s/60)+'m ago':s<129600?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'},
+ chips(top,full){return(top?String(top).split(','):[]).filter(p=>PRO[p]).map(p=>`<span class="lb-d" style="--dc:${PRO[p].c}"><i>${PRO[p].g}</i>${full?esc(PRO[p].nm):''}</span>`).join('')},
+ rowHTML(r,i,mine){const om=r.rank>=100,pos=i+1,w=r.wins||0,l=r.losses||0,tot=w+l,st=r.story||0;return`<div class="lb-r${mine?' me':''}${pos<=3?' p'+pos:''}" data-i="${i}"><div class="lb-top"><span class="lb-n">${pos}</span>${avatarHTML(r.port||'',r.bord||'',38)}
+  <div class="lb-who"><b>${esc(r.name||'OPERATOR')}</b><small>${esc(FO.standing(r.rank))}${r.title?' · '+esc(r.title):''}</small><div class="lb-mini">${this.chips(r.top)}<em>${w}W · ${l}L</em></div></div>
+  <div class="lb-st"><b>${om?'Ω '+r.omega:'RANK '+r.rank}</b>${om?'<small>OMEGA</small>':`<span class="lb-pips">${[0,1,2].map(k=>`<i class="${k<r.intel?'on':''}"></i>`).join('')}</span>`}</div>
+  <span class="lb-pl">${r.platform==='android'?'AND':r.platform==='iphone'?'IOS':'WEB'}</span></div>
+  <div class="lb-more"><div class="lb-mr"><small>MOST PLAYED</small><div>${this.chips(r.top,1)||'<span class="lb-none">No directives played yet</span>'}</div></div>
+   <div class="lb-g"><div><small>RECORD</small><b>${w} – ${l}</b><span>${tot?Math.round(100*w/tot)+'% wins':'no games yet'}</span></div><div><small>STORY</small><b>${st} / ${STORY.length}</b><span>${st?this.sect(st):'not started'}</span></div>
+   <div><small>LEVEL</small><b>${r.lvl||1}</b><span>seen ${this.ago(r.updated_at)}</span></div></div></div></div>`},
+ draw(m,a,note){const f=FO.st(),me=this.me().id,set=FO.seasonSet(),days=Math.max(0,Math.ceil((FO.seasonEnd(f.season)-Date.now())/864e5));const at=a.findIndex(r=>r.id===me);
+  const B=m.querySelector('#lbBody');B.innerHTML=`<div class="fo-season" style="--fc:${set.c}"><b>SEASON ${f.season} · ${set.n}</b><small>${a.length} operator${a.length===1?'':'s'} ranked · ${days} day${days===1?'':'s'} left</small></div>
+   ${note?`<div class="fo-note">${note}</div>`:''}
+   ${at>=0?`<div class="c2h">YOU</div>${this.rowHTML(a[at],at,1)}`:''}
+   <div class="c2h">STANDINGS</div>${a.length?a.map((r,i)=>this.rowHTML(r,i,r.id===me)).join(''):'<div class="fo-note">Nobody has reported in this season yet.</div>'}
+   <div class="fo-foot">Tap a player for their record, story progress and most played directives.<br>Ranked by Field Operations standing: rank first, then Intel. At OMEGA, by OMEGA score. Updates after every operation.</div>`;
+  // tap a row to open its details; keep it open across auto refreshes
+  const rows=[...B.querySelectorAll('.lb-r')];rows.forEach((el,k)=>el.onclick=()=>{AU.ui();const on=!el.classList.contains('open');rows.forEach(x=>x.classList.remove('open'));if(on){el.classList.add('open');this.open=k}else this.open=null});
+  if(this.open!=null&&rows[this.open])rows[this.open].classList.add('open')},
+ async refresh(m,quiet){if(this.busy)return;this.busy=1;const f=FO.st();const sp=m.querySelector('#lbR');if(sp&&!quiet)sp.classList.add('spin');
+  try{await this.push();const a=await this.list(f.season);this.draw(m,a)}
+  catch(e){const c=this.cached(f.season);this.draw(m,c?c.a:[],`Can't reach the leaderboard right now.${c?` Showing the list from ${this.ago(c.t)}.`:''}`)}
+  finally{this.busy=0;sp&&sp.classList.remove('spin')}}};
+SCR.board=m=>{const d=PROF.d;
+ m.innerHTML=`<div class="scrh"><button class="lnk" id="lbB">‹ FIELD OPS</button><b>LEADERBOARD</b><button class="lnk lb-rf" id="lbR">↻</button></div><div id="lbBody"></div>
+  <button class="ghost2 lb-cs" id="lbC">LISTED AS ${esc(d.name||'OPERATOR')} · CHANGE CODE NAME IN PROFILE ›</button>`;
+ $('lbB').onclick=()=>{AU.ui();HUB.show('fieldops')};$('lbR').onclick=()=>{AU.ui();LB.refresh(m)};$('lbC').onclick=()=>{AU.ui();HUB.show('coll','prof')};
+ if(!LB.on()){LB.draw(m,[],'The leaderboard is not switched on in this build yet.');return}
+ const c=LB.cached(FO.st().season);LB.draw(m,c?c.a:[],c?null:'Loading…');
+ const go=()=>{LB.refresh(m);clearInterval(LB.timer);LB.timer=setInterval(()=>{if(!document.body.contains(m.querySelector('#lbBody'))){clearInterval(LB.timer);return}if(!document.hidden)LB.refresh(m,1)},20000)};
+ go()};
+// report after every ranked result, and once when the game opens
+{const ap=FO.apply.bind(FO);FO.apply=function(...a){const r=ap(...a);LB.soon();return r}}
+setTimeout(()=>LB.push(),5000);
+// a way in from Field Operations
+{const fo=SCR.fieldops;SCR.fieldops=(m,arg)=>{fo(m,arg);const rk=m.querySelector('.fo-rank');if(!rk||!LB.on())return;const b=document.createElement('button');b.className='ghost2 lb-go';b.innerHTML='<b>LEADERBOARD</b><small>See where your friends stand</small>';
+ rk.after(b);b.onclick=()=>{AU.ui();HUB.show('board')}}}
+{const st=document.createElement('style');st.textContent=`
+.lb-go{display:flex;width:100%;justify-content:space-between;align-items:center;padding:12px 14px;margin:-4px 0 12px}.lb-go b{font:700 14px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-go small{color:#a89c7c}
+.lb-rf{font-size:18px;min-width:40px}.lb-rf.spin{animation:lbspin .8s linear infinite}@keyframes lbspin{to{transform:rotate(360deg)}}
+.lb-r{padding:8px 10px;margin-bottom:6px;border-radius:9px;background:#14120d;border:1px solid #2a261a;cursor:pointer}.lb-top{display:flex;align-items:center;gap:10px}
+.lb-mini{display:flex;align-items:center;gap:4px;margin-top:3px}.lb-mini em{font:normal 10px var(--mono);color:#a89c7c;margin-left:4px;letter-spacing:.04em}
+.lb-d{display:inline-flex;align-items:center;gap:5px;height:18px;min-width:18px;padding:0 5px;border-radius:4px;background:color-mix(in srgb,var(--dc) 22%,#0b0a08);border:1px solid color-mix(in srgb,var(--dc) 60%,transparent);color:#efe5cc;font:700 10px var(--disp);letter-spacing:.08em}.lb-d i{font-style:normal;color:var(--dc);font-size:11px}
+.lb-more{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #3a3424}.lb-r.open .lb-more{display:block}.lb-mr small,.lb-g small{display:block;color:#8c8266;font-size:10px;letter-spacing:.12em;margin-bottom:4px}.lb-mr>div{display:flex;flex-wrap:wrap;gap:6px}.lb-mr .lb-d{height:24px;font-size:11px;padding:0 8px}
+.lb-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.lb-g>div{background:#0b0a08;border:1px solid #2a261a;border-radius:7px;padding:7px 8px}.lb-g b{display:block;font:700 16px var(--disp);color:#efe5cc;letter-spacing:.06em}.lb-g span{font-size:10px;color:#a89c7c}.lb-none{color:#6a6250;font-size:11px}
+.lb-r.me{border-color:#f2a93b;background:linear-gradient(90deg,#2a1e0c,#14120d)}
+.lb-n{width:26px;text-align:center;font:700 16px var(--disp);color:#a89c7c}.lb-r.p1 .lb-n{color:#ffd23a}.lb-r.p2 .lb-n{color:#d8dce4}.lb-r.p3 .lb-n{color:#e0a070}
+.lb-who{flex:1;min-width:0}.lb-who b{display:block;font:700 14px var(--disp);letter-spacing:.08em;color:#efe5cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lb-who small{display:block;color:#8c8266;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-st{text-align:right}.lb-st b{display:block;font:700 13px var(--disp);letter-spacing:.1em;color:#ffd58a}.lb-st small{color:#8c8266;font-size:10px;letter-spacing:.1em}
+.lb-pips{display:inline-flex;gap:3px}.lb-pips i{width:7px;height:7px;border-radius:50%;border:1px solid #9fd8b0}.lb-pips i.on{background:#9fd8b0}
+.lb-pl{font:700 9px var(--mono);letter-spacing:.08em;color:#6a6250;border:1px solid #3a3424;border-radius:4px;padding:2px 4px}
+.lb-cs{width:100%;margin-top:10px;padding:10px}
+.lb-name{position:fixed;inset:0;z-index:9500;background:rgba(5,4,3,.82);display:flex;align-items:center;justify-content:center;padding:20px}
+.lb-nb{width:min(380px,92vw);background:#14120d;border:1px solid #b08a46;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}.lb-nb b{font:700 16px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-nb small{color:#a89c7c}
+.lb-nb input{font:700 20px var(--disp);letter-spacing:.12em;text-transform:uppercase;padding:10px 12px;border-radius:8px;border:1px solid #4b5034;background:#0b0a08;color:#efe5cc;user-select:text;-webkit-user-select:text}`;document.head.appendChild(st)}
 // ===== input / choices UI =====
 const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new Set(),
  wait(req){return new Promise(res=>{this.req=req;this.res=res;this.sel.clear();this.apply()})},
@@ -6387,7 +6463,7 @@ const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new S
   if(q.kind==='card'){for(const c of q.cands){const e=V.EL[c.id];if(e)e.classList.add('tgt')}show(q.prompt,q.opt,false)}
   if(q.kind==='line'){for(const li of q.lines)V.lane(li).classList.add('tgtl');show(q.prompt,q.opt,false)}
   if(q.kind==='hand'){for(const c of q.cards){const e=V.EL[c.id];if(e)e.classList.toggle(this.sel.has(c)?'sel':'tgt',true)}
-   show(`${q.prompt} (${this.sel.size} picked)`,false,this.sel.size>=q.min&&this.sel.size<=q.max)}
+   show(`${q.prompt} (${this.sel.size} picked) · hold a card to read it`,false,this.sel.size>=q.min&&this.sel.size<=q.max)}
   if(q.kind==='option'){show(q.prompt,false,false);for(const o of q.opts){const b=document.createElement('button');b.className='optb';b.textContent=o.t.toUpperCase();b.onclick=e=>{e.stopPropagation();SFX.beep();this.finish(o)};$('prompt').appendChild(b)}}
   if(q.kind==='rearrange')this.openRearr(q);
   if(q.kind==='action')V.setStatus('go')},
@@ -6398,10 +6474,19 @@ const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new S
   draw();$('rearr').classList.add('on');$('raok').onclick=()=>{$('rearr').classList.remove('on');this.finish(names)};$('rano').onclick=()=>{$('rearr').classList.remove('on');this.finish(q.names)}},
  overlay(id,ms){return new Promise(r=>{const o=$(id);o.classList.add('on');let done=false;const end=()=>{if(done)return;done=true;o.classList.remove('on');o.onclick=null;r()};o.onclick=end;setTimeout(end,ms)})},
  laneTap(li,e){const q=this.req;if(q&&q.kind==='line'&&q.lines.includes(li)){SFX.beep();this.finish(li)}},
+ pick(c){const q=this.req;if(!q)return false;
+  if(q.kind==='card'){if(q.cands.includes(c)){SFX.beep();this.finish(c);return true}return false}
+  if(q.kind==='line'){const l=locate(c);if(l&&q.lines.includes(l.li)){SFX.beep();this.finish(l.li);return true}return false}
+  if(q.kind==='hand'){if(q.cards.includes(c)){if(this.sel.has(c))this.sel.delete(c);else if(this.sel.size<q.max)this.sel.add(c);SFX.flip();this.apply();return true}return false}return false},
+ // while a choice is open: tap picks, holding a card (about half a second) opens it big so it can be read first
+ hold(ev,c,e){const pid=ev.pointerId,x=ev.clientX,y=ev.clientY;let held=false,done=false;e.classList.add('holding');
+  const t=setTimeout(()=>{if(done)return;held=true;buzz(8);this.inspect(c)},420);
+  const end=u=>{if(u.pointerId!==pid||done)return;done=true;clearTimeout(t);e.classList.remove('holding');e.removeEventListener('pointermove',mv);e.removeEventListener('pointerup',end);e.removeEventListener('pointercancel',end);
+   if(!held&&u.type==='pointerup')this.pick(c)};
+  const mv=m=>{if(m.pointerId!==pid)return;if(Math.hypot(m.clientX-x,m.clientY-y)>12){done=true;clearTimeout(t);e.classList.remove('holding');e.removeEventListener('pointermove',mv);e.removeEventListener('pointerup',end);e.removeEventListener('pointercancel',end)}};
+  try{e.setPointerCapture(pid)}catch(_){}e.addEventListener('pointermove',mv);e.addEventListener('pointerup',end);e.addEventListener('pointercancel',end)},
  down(ev,c,e){ev.preventDefault();SFX.init();const q=this.req;const inHand=S.p.me.hand.includes(c);
-  if(q&&q.kind==='card'){if(q.cands.includes(c)){SFX.beep();this.finish(c)}return}
-  if(q&&q.kind==='line'){const l=locate(c);if(l&&q.lines.includes(l.li)){SFX.beep();this.finish(l.li)}return}
-  if(q&&q.kind==='hand'){if(q.cards.includes(c)){if(this.sel.has(c))this.sel.delete(c);else if(this.sel.size<q.max)this.sel.add(c);SFX.flip();this.apply()}return}
+  if(q&&(q.kind==='card'||q.kind==='line'||q.kind==='hand')){this.hold(ev,c,e);return}
   if(!inHand){this.inspect(c);return}
   const st={c,e,x:ev.clientX,y:ev.clientY,t:performance.now(),on:false,lx:ev.clientX,ly:ev.clientY,vx:0,vy:0,pid:ev.pointerId};AU.pickup();e.classList.add('lift');
   try{e.setPointerCapture(ev.pointerId)}catch(_){}
@@ -6429,8 +6514,11 @@ const UI={req:null,res:null,drag:null,lastTap:{id:0,t:0},tapTimer:null,sel:new S
   else{e.classList.remove('drag');const r=e.getBoundingClientRect();e.style.transform='';V.render();if(!cancel)AU.thunk()}},
  inspect(c){const own=c.owner==='me';const show=c.up||(own&&!onBoard(c)&&true)||own;const slot=$('bigslot');
   slot.innerHTML=`<div class="cd big" style="position:relative">${show?faceHTML(c):backHTML(c,false,cardValue(c))}</div>`;
-  const b=$('iflip');const inHand=S.p.me.hand.includes(c);b.style.display=inHand?'':'none';
-  if(inHand){b.textContent=c.fdHand?'PLAY FACE-UP':'PLAY FACE-DOWN';b.onclick=ev=>{ev.stopPropagation();c.fdHand=!c.fdHand;SFX.flip();V.render();$('inspect').classList.remove('on')}}
+  const b=$('iflip');const inHand=S.p.me.hand.includes(c);const q=this.req,ch=q&&q.kind!=='action'&&q.kind!=='option'&&q.kind!=='rearrange';b.style.display=inHand||ch?'':'none';
+  const can=ch&&(q.kind==='hand'?q.cards.includes(c):q.kind==='card'?q.cands.includes(c):q.kind==='line'?(()=>{const l=locate(c);return!!(l&&q.lines.includes(l.li))})():false);
+  if(ch){b.style.display=can?'':'none';b.textContent=q.kind==='hand'?(this.sel.has(c)?'UNPICK':'PICK THIS CARD'):q.kind==='line'?'CHOOSE THIS LINE':'CHOOSE THIS CARD';
+   b.onclick=ev=>{ev.stopPropagation();$('inspect').classList.remove('on');this.pick(c)}}
+  else if(inHand){b.textContent=c.fdHand?'PLAY FACE-UP':'PLAY FACE-DOWN';b.onclick=ev=>{ev.stopPropagation();c.fdHand=!c.fdHand;SFX.flip();V.render();$('inspect').classList.remove('on')}}
   if(onBoard(c)&&!c.up&&own)slot.insertAdjacentHTML('beforeend','<div style="text-align:center;font:11px var(--mono);color:#7fe0ff;margin-top:6px">FACE-DOWN · worth '+cardValue(c)+' · only you can see this</div>');
   const o=$('inspect');o.classList.add('on');o.onclick=()=>o.classList.remove('on')}};
 $('pskip').onclick=e=>{e.stopPropagation();const q=UI.req;if(!q)return;UI.finish(q.kind==='line'?null:null)};
@@ -6460,6 +6548,8 @@ V.buildLanes();drawPick();
 window.__T={get S(){return S},DECKS,V,UI,AI,EFF,newGame,total,cardValue,canPlayUp,canPlayFD,compilable,playCard,flipCard,deleteCard,returnCard,shiftCard,runEffect,compileLine,
  countAll:()=>allCards().length,locate};
 window.onerror=(m,s,l,c,e)=>{window.__ERR=String(e&&e.stack||m)};
+// hold-to-read: highlight the card being held, and keep the choice bar out of the way of the big card
+{const st=document.createElement('style');st.textContent='.cd.holding{filter:brightness(1.25) drop-shadow(0 0 6px rgba(255,213,138,.6))}body:has(#inspect.on) #prompt{visibility:hidden}';document.head.appendChild(st)}
 $('title').classList.remove('on');HUB.build();if(AUTO||Q.has('go'))start();else if(Q.has('tut'))TUT.brief();else if(Q.has('nosplash')||FAST)HUB.show('home');else SPLASH.show();
 </script>
 </body></html>
