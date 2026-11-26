@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="9">
+<meta name="c75-build" content="10">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -1196,6 +1196,9 @@ const NAME={me:'You',get ai(){return OPT()}};
 let S, UID=0;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function mkDeck(who){const d=[];for(const p of DECKS[who])for(const [v,top,mid,bot] of CARDS[p]){const tt=x=>x.startsWith('Start')?'Start':x.startsWith('End')?'End':null;const trig=tt(top)||tt(bot),tsec=tt(top)?'top':'bot';const T=ART_TXT[p+'-'+v]||[top,mid,bot];d.push({id:++UID,proto:p,v,top:T[0],mid:T[1],bot:T[2],trig,tsec,owner:who,up:false,fdHand:false})}return shuffle(d)}
+function keyOn(){const o=(typeof PROF!=='undefined'&&PROF.d&&PROF.d.opt)||{};return o.key!=null?!!o.key:o.nokey===0}
+// with the key off, missions that ask you to seize it count a fresh 2-line lead instead
+function KT(t){return keyOn()?t:t.replace(/Seize the Override Key/g,'Take a 2-line lead').replace(/seize the Override Key/g,'take a 2-line lead')}
 function newGame(cfg={}){
  UID=0;if(cfg.seed!=null)seed=cfg.seed;if(cfg.decks){DECKS.me=cfg.decks.me;DECKS.ai=cfg.decks.ai}
  S={lines:[0,1,2].map(()=>({me:[],ai:[]})),
@@ -1203,10 +1206,10 @@ function newGame(cfg={}){
      ai:{protos:shuffle(DECKS.ai.map(n=>({name:n,compiled:false}))),deck:mkDeck('ai'),hand:[],discard:[]}},
   turn:rnd()<.5?'me':'ai',control:null,noCompile:{me:false,ai:false},winner:null,turnNo:0,log:[],uq:[],depth:0,revealed:{me:0,ai:0},cfg,rx:cfg.rx?structuredClone(cfg.rx):{},removed:{me:[],ai:[]},mods:cfg.mods||{},lvl:{me:cfg.lvlMe??1,ai:cfg.lvl??1}};
  for(const w of ['me','ai'])for(let i=0;i<(S.rx.hopen||HCAP());i++)S.p[w].hand.push(S.p[w].deck.pop());
- // Override Key (Control) can be switched off in Settings. It stays on for training, puzzles/scenarios, missions that hand out the key,
+ // Override Key (Control) is off by default and can be switched on in Settings. It stays on for puzzles/scenarios, missions that hand out the key,
  // and any directive marked needsKey (for later waves whose cards use it). cfg.noKey overrides everything.
- {const o=(typeof PROF!=='undefined'&&PROF.d&&PROF.d.opt)||{};const need=!!(cfg.tut||S.mods.aiKey||S.rx.scn||S.rx.meKey||[...DECKS.me,...DECKS.ai].some(p=>PRO[p]&&PRO[p].needsKey));
-  S.noKey=cfg.noKey!=null?!!cfg.noKey:(!!o.nokey&&!need&&cfg.mode!=='sim')}
+ {const o=(typeof PROF!=='undefined'&&PROF.d&&PROF.d.opt)||{};const need=!!(S.mods.aiKey||S.rx.scn||S.rx.meKey||[...DECKS.me,...DECKS.ai].some(p=>PRO[p]&&PRO[p].needsKey));
+  S.noKey=cfg.noKey!=null?!!cfg.noKey:(!keyOn()&&!need&&cfg.mode!=='sim');S.keyForced=!keyOn()&&need&&!S.rx.scn&&cfg.mode!=='sim'}
  const M=S.mods;if(M.aiKey)S.control='ai';if(M.aiExtra)for(let i=0;i<M.aiExtra;i++)S.p.ai.hand.push(S.p.ai.deck.pop());if(M.aiPre)for(let i=0;i<M.aiPre;i++)S.p.ai.protos[i].compiled=true;if(cfg.first)S.turn=cfg.first;
 }
 // ===== queries =====
@@ -1463,8 +1466,10 @@ const AI={
 async function triggers(w,kind){const ok=c=>c.up&&onBoard(c)&&(c.tsec==='top'||isTop(c));const cs=boardCards((c,li,s)=>s===w&&c.trig===kind&&ok(c));
  for(const c of cs){if(S.winner)return;if(ok(c))await runEffect(c,c.tsec)}}
 async function takeTurn(w){S.turnNo++;S.turn=w;await V.render();await V.banner(w);
+ if(S.turnNo===1&&S.keyForced&&!S.sim)await V.toast('THIS MATCH USES THE OVERRIDE KEY · LEAD 2 LINES TO TAKE IT');
  await hook('turnStart',w);if(S.winner)return;await triggers(w,'Start');
  if(!S.noKey&&leads(w)>=2&&S.control!==w){S.control=w;log(`${NAME[w]} take the Override Key.`);await V.control(w)}
+ else if(S.noKey&&leads(w)>=2&&S.vkey!==w){S.vkey=w;if(w==='me'&&!S.sim&&S.cfg&&S.cfg.mode!=='puzzle'){const E=S.ev||(S.ev={proto:{}});E.key=(E.key||0)+1}}
  const cl=compilable(w);if(window.__CT)window.__CT(w,cl);if(S.noCompile[w]){S.noCompile[w]=false;if([0,1,2].some(li=>{const a=total(li,w);return a>=thresh(w,li)&&a>total(li,OPP[w])}))log(`${NAME[w]} can't compleat this turn.`)}
  if(cl.length){const li=cl.length>1?await pickLine(w,cl,li=>S.p[w].protos[li].compiled?0:1+total(li,w)*.01,'Compleat which line?'):cl[0];
   await compileLine(w,li);if(S.winner)return;await useControl(w)}
@@ -2874,7 +2879,7 @@ SCR.altart=(m,p)=>{m.innerHTML=`<div class="scrh"><button class="lnk" id="aaB">�
 const MPOOL=[{id:'win1',t:'Win a match',goal:1,ev:'win',r:60},{id:'win3',t:'Win 3 matches',goal:3,ev:'win',r:120},{id:'up10',t:'Play 10 cards face-up',goal:10,ev:'playUp',r:60},
  {id:'fd6',t:'Play 6 cards face-down',goal:6,ev:'playFD',r:60},{id:'comp3',t:'Compleat 3 directives',goal:3,ev:'compile',r:80},{id:'del4',t:'Delete 4 cards',goal:4,ev:'delete',r:70},
  {id:'flip6',t:'Flip 6 cards',goal:6,ev:'flip',r:60},{id:'puz1',t:'Solve a duel puzzle',goal:1,ev:'puzzle',r:70},{id:'st1',t:'Clear a story mission',goal:1,ev:'storywin',r:80},
- {id:'hard',t:'Win on Veteran or Elite',goal:1,ev:'winHard',r:100},{id:'key2',t:'Seize the Override Key twice',goal:2,ev:'key',r:60},{id:'proto',t:'Play 5 cards of',goal:5,ev:'proto',r:70}];
+ {id:'hard',t:'Win on Veteran or Elite',goal:1,ev:'winHard',r:100},{id:'key2',get t(){return KT('Seize the Override Key twice')},goal:2,ev:'key',r:60},{id:'proto',t:'Play 5 cards of',goal:5,ev:'proto',r:70}];
 const MIS={get(){const d=PROF.d,key=TM.key('day');if(!d.mis||d.mis.day!==key){const rng=seeded('mis'+key);d.mis={day:key,list:pickN(MPOOL,3,rng).map(m=>({id:m.id,prog:0,claimed:false,p:m.ev==='proto'?d.pick[Math.floor(rng()*3)]:null}))};PROF.save()}return d.mis},
  def(id){return MPOOL.find(m=>m.id===id)},
  add(ev,n=1,proto){if(!n)return;const M=this.get();let ch=false;for(const x of M.list){const D=this.def(x.id);if(D.ev!==ev||x.claimed)continue;if(ev==='proto'&&x.p!==proto)continue;if(x.prog<D.goal){x.prog=Math.min(D.goal,x.prog+n);ch=true}}if(ch)PROF.save()},
@@ -3045,7 +3050,7 @@ const TX={EPOCH:new Date(2026,10,16).getTime(),DAY:864e5,TIERS:20,XPT:145,COST:9
   return[{id:'a1',w:0,t:`Play ${12} ${nm(A)} cards`,ev:'proto',arg:A,goal:12,xp:150},{id:'a2',w:0,t:`Win 2 matches running ${nm(A)}`,ev:'winWith',arg:A,goal:2,xp:200},
    {id:'a3',w:0,t:'Flip 12 cards',ev:'flip',goal:12,xp:120},{id:'a4',w:0,t:`Compleat ${nm(A)} twice`,ev:'compP',arg:A,goal:2,xp:160},{id:'a5',w:0,t:'Play 8 cards face-down',ev:'playFD',goal:8,xp:120},
    {id:'b1',w:1,t:`Play 20 ${nm(B)} cards`,ev:'proto',arg:B,goal:20,xp:180},{id:'b2',w:1,t:`Win 3 matches running ${nm(A)}`,ev:'winWith',arg:A,goal:3,xp:220},
-   {id:'b3',w:1,t:'Delete 10 cards',ev:'delete',goal:10,xp:130},{id:'b4',w:1,t:'Win 2 matches on Veteran or Elite',ev:'winHard',goal:2,xp:200},{id:'b5',w:1,t:'Seize the Override Key 3 times',ev:'key',goal:3,xp:120}]},
+   {id:'b3',w:1,t:'Delete 10 cards',ev:'delete',goal:10,xp:130},{id:'b4',w:1,t:'Win 2 matches on Veteran or Elite',ev:'winHard',goal:2,xp:200},{id:'b5',w:1,get t(){return KT('Seize the Override Key 3 times')},ev:'key',goal:3,xp:120}]},
  wkOpen(I,w){return w===0||Date.now()>=I.start+7*this.DAY},
  feed(I,ev,n,arg){if(!n)return[];const s=this.st(I.key),done=[];for(const M of this.mis(I)){if(M.ev!==ev||(M.arg&&M.arg!==arg)||!this.wkOpen(I,M.w))continue;const p=s.mis[M.id]||0;if(p>=M.goal)continue;
   s.mis[M.id]=Math.min(M.goal,p+n);if(s.mis[M.id]>=M.goal)done.push(M)}return done},
@@ -4850,7 +4855,7 @@ const EVO={
 // ---------- doc missions + XP model on the Transmission track ----------
 const EVMIS=[{id:'k1',w:-1,t:'Kickoff: Receiver Online · finish 5 matches',ev:'match',goal:5,xp:200},
  {id:'a1',w:0,t:'Hidden Agenda · play 12 face-down Commands',ev:'playFD',goal:12,xp:75},{id:'a2',w:0,t:'System Override · compleat 5 pending Directives',ev:'pend',goal:5,xp:100},
- {id:'a3',w:0,t:'Power Struggle · seize the Override Key 5 times',ev:'key',goal:5,xp:75},{id:'a4',w:0,t:'New Methodology · finish matches with 3 different decks',ev:'deck',goal:3,xp:50},
+ {id:'a3',w:0,get t(){return KT('Power Struggle · seize the Override Key 5 times')},ev:'key',goal:5,xp:75},{id:'a4',w:0,t:'New Methodology · finish matches with 3 different decks',ev:'deck',goal:3,xp:50},
  {id:'b1',w:1,t:'Chain Reaction · resolve 20 Command effects',ev:'fx',goal:20,xp:75},{id:'b2',w:1,t:'Successful Experiment · win 3 event matches',ev:'evwin',goal:3,xp:100},
  {id:'b3',w:1,t:'The Comeback · win after trailing in compleated Directives',ev:'comeback',goal:1,xp:75},{id:'b4',w:1,t:'Field Report · finish 4 matches',ev:'match',goal:4,xp:50}];
 Object.assign(TX,{MATCH:25,WIN:10,XPT:79,FIRST:35,
@@ -4933,6 +4938,8 @@ const EVTITLES=[['Holdout','E'],['Flawless Run','L'],['Grand Experimenter','L'],
 EVTITLES.forEach(([t,r])=>TITLES.push([t,r,0]));
 {const c0=catalog;catalog=function(){const L=c0();for(const[t,r]of EVTITLES)if(!L.find(i=>i.id==='title:'+t))L.push({id:'title:'+t,k:'title',v:t,n:'Title: '+t,r,tx:1,evt:1});return L};_CAT=null}
 {const sh=srcHint;srcHint=function(id){const it=CAT().find(i=>i.id===id);if(it&&it.evt)return'EVENTS';return sh(id)}}
+
+{const d=EVOBJ.distort&&EVOBJ.distort.find(x=>x[1]==='key');if(d)Object.defineProperty(d,0,{get(){return KT('Seize the Override Key 5 times')},enumerable:true})}
 // ===== EVENTS v0.2 · part 3: authored scenarios (Operator Trials, Against the Machine) =====
 // card spec: [proto, value, faceUp]
 const SCNLIB={
@@ -5559,9 +5566,9 @@ const PRG={gen:0,
   $('ptGo').onclick=()=>{unlock();AU.ui();const go=()=>{o.remove();if(OB.st().complete){if(typeof MUS!=='undefined')MUS.play('ambient');HUB.show('home')}else this.resume()};if(this.rm()){go();return}
    o.querySelector('.pt-in').animate([{opacity:1},{opacity:0}],{duration:450,fill:'forwards'}).onfinish=go}},
  settings(){const d=PROF.d;d.opt=d.opt||{};const o=document.createElement('div');o.className='evm';const draw=()=>{o.innerHTML=`<div class="evm-b"><small>SETTINGS</small><b>Options</b>
-  <button class="ghost2 pro-opt" data-k="snd">SOUND: ${['OFF','EFFECTS ONLY','ALL'][AU.mode]}</button><button class="ghost2 pro-opt" data-k="it">TEXT: ${d.opt.it?'INSTANT':'TYPED'}</button><button class="ghost2 pro-opt" data-k="rm">REDUCED MOTION: ${d.opt.rm?'ON':'OFF'}</button><button class="ghost2 pro-opt" data-k="nokey">OVERRIDE KEY: ${d.opt.nokey?'OFF':'ON'}</button>
+  <button class="ghost2 pro-opt" data-k="snd">SOUND: ${['OFF','EFFECTS ONLY','ALL'][AU.mode]}</button><button class="ghost2 pro-opt" data-k="it">TEXT: ${d.opt.it?'INSTANT':'TYPED'}</button><button class="ghost2 pro-opt" data-k="rm">REDUCED MOTION: ${d.opt.rm?'ON':'OFF'}</button><button class="ghost2 pro-opt" data-k="key">OVERRIDE KEY: ${keyOn()?'ON':'OFF'}</button>
   <button class="big-btn wide sm" data-k="x">DONE</button></div>`;o.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.k;AU.ui();if(k==='x'){o.remove();return}
-   if(k==='snd'){AU.init();AU.setMode((AU.mode+2)%3);const h=$('hbsnd');if(h)h.textContent=['✕','SFX','♪'][AU.mode]}else{d.opt[k]=d.opt[k]?0:1;PROF.save();if(k==='nokey'&&typeof S!=='undefined'&&S&&!S.winner&&!S.sim&&S.cfg&&S.cfg.mode&&typeof toast2==='function')toast2('Override Key change applies from your next match')}draw()})};draw();$('app').appendChild(o)},
+   if(k==='snd'){AU.init();AU.setMode((AU.mode+2)%3);const h=$('hbsnd');if(h)h.textContent=['✕','SFX','♪'][AU.mode]}else{if(k==='key')d.opt.key=keyOn()?0:1;else d.opt[k]=d.opt[k]?0:1;PROF.save();if(k==='key'&&typeof S!=='undefined'&&S&&!S.winner&&!S.sim&&S.cfg&&S.cfg.mode&&typeof toast2==='function')toast2('Override Key change applies from your next match')}draw()})};draw();$('app').appendChild(o)},
  // resume from the saved checkpoint
  resume(){const s=OB.st();if(typeof MUS!=='undefined'&&MUS.cur)MUS.play('none');
   if(s.complete){HUB.show('home');return}
@@ -5826,7 +5833,7 @@ const COACH={on:false,
   if(!s.has('L03'))return after('L02')&&this.legal('fd')?'L03':null;
   if(!s.has('L04'))return after('L03')||this.ev.comp?'L04':null;
   if(!s.has('L05'))return(S.p.me.hand.length<5||t-(this.resT.L04||t)>=4)&&after('L04')?'L05':null;
-  if(!s.has('L06'))return(this.ev.key||after('L05'))?'L06':null;
+  if(!s.has('L06')){if(S.noKey){if(!after('L05'))return null;s.add('L06');this.resT.L06=t}else return(this.ev.key||after('L05'))?'L06':null}
   if(!s.has('L07'))return(this.ev.comp||after('L06'))?'L07':null;return null},
  tick(){if(!this.el||!S||!S.cfg||!S.cfg.pro)return;if(S.winner){this.stop();return}
   const c=this.cur;
@@ -6477,6 +6484,11 @@ setTimeout(()=>LB.push(),5000);
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:10,d:'2026-11-26',t:'Key off by default',i:[
+  ['CHANGE','The Override Key is now off by default. Turn it on in Settings if you want it. Directives stay where they start unless a card rearranges them.'],
+  ['CHANGE','Missions that asked you to seize the Override Key ask for a 2-line lead instead while the key is off.'],
+  ['CHANGE','Training follows your Override Key setting.'],
+  ['NEW','Missions built around the key (like opponents who start holding it) still use it, and the match tells you so at the start.']]},
  {b:9,d:'2026-11-26',t:'Your rules',i:[
   ['NEW','You can turn the Override Key off in Settings. With it off, nobody takes the key in your matches. It stays on in training, puzzles, and missions that start someone with the key.'],
   ['CHANGE','The training opponent is a lot easier now. It makes real mistakes and never spends the Override Key.'],
