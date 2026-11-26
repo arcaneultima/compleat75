@@ -3735,7 +3735,7 @@ const FO_EPOCH=Date.UTC(2026,10,25),FO_LEN=30*864e5;
 const FO_SEAS=[['FIRST FROST','#9fd8ff','#0b1a2a'],['BLACK ICE','#c8d6ff','#0c0f1e'],['HARD WINTER','#e8f2ff','#18222e'],['THAW','#9fe0b0','#0d1a12'],['DEAD LETTER','#ffcf8a','#21160a'],['LONG WIRE','#ffd23a','#1e1a08'],
  ['HEAT LIGHTNING','#ff8a5a','#240e08'],['DOG DAYS','#f2c46a','#22180a'],['IRON HARVEST','#d8b27a','#1c140c'],['FALLEN LEAF','#ff9a4a','#221006'],['NIGHT WATCH','#8ab0ff','#080c1c'],['YEAR END','#ffe08a','#1a1406']];
 const FO_MS=[10,20,30,40,50,60,70,80,90,100];
-const FO_PAL={Cautious:['#16201a','#9fd8b0'],Aggressive:['#240c0a','#ff8a6a'],Bluffer:['#1c1226','#d0a0ff'],Analyst:['#0e1a24','#8fc8ff'],Steady:['#1e1a0e','#e8cf8a']};
+const FO_PAL={Cautious:['#16201a','#9fd8b0'],Aggressive:['#240c0a','#ff8a6a'],Bluffer:['#1c1226','#d0a0ff'],Analyst:['#0e1a24','#8fc8ff'],Steady:['#1e1a0e','#e8cf8a'],Trickster:['#0f1a0a','#a8e05a']};
 // seasonal cosmetics: one set per season, cycling every 12 seasons
 FO_SEAS.forEach(([n,c],i)=>{const k=i+1;PORTS.push(['fos'+k,n+' Seal','E',0]);BORDS.push(['fos'+k,n,'E',0]);BACKS.push(['fos'+k,n+' (Season)','L',0]);TITLES.push([FO_tc(n)+' Operative','E',0])});
 function FO_tc(s){return s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}
@@ -3757,7 +3757,15 @@ function foSealPort(k){const[n,c,bg]=FO_SEAS[(k-1)%12];const R=['I','II','III','
 function foIkePort(){return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ik"><stop offset="0" stop-color="#5a0c08"/><stop offset="1" stop-color="#0a0202"/></radialGradient></defs><rect width="100" height="100" fill="url(#ik)"/>
  <path d="M8 100 Q12 74 34 70 L66 70 Q88 74 92 100Z" fill="#000"/><ellipse cx="50" cy="44" rx="18" ry="22" fill="#000"/><rect x="30" y="38" width="40" height="8" fill="#ffd23a" opacity=".9"/>
  <text x="50" y="92" text-anchor="middle" font-family="Oswald,Impact" font-weight="700" font-size="14" letter-spacing="4" fill="#ffd23a">IKE</text></svg>`}
-{const ps=portraitSVG;portraitSVG=function(id,pal){const s=String(id);let m;if((m=/^fos(\d+)$/.exec(s)))return foSealPort(+m[1]);if(s==='fo-ike')return foIkePort();return ps(id,pal)}}
+{const ps=portraitSVG;portraitSVG=function(id,pal){const s=String(id);let m;if((m=/^fos(\d+)$/.exec(s)))return foSealPort(+m[1]);if(s==='fo-ike')return foIkePort();if(s==='fo-collin'||s==='fo-'+FO_COLLIN.id)return foCollinPort();return ps(id,pal)}}
+// ----- Collin: the trickster. Same odds as Ike, same CHEDDAR exemption, every match under one of his rules -----
+const FO_COLLIN={id:'FO-102',cn:'COLLIN',pf:'Trickster',p:0.01,
+ rules:['lightsout','dying','sudden','distort','overdrive','jam','lockdown','breach','deaddrop','rapid','open','short','high','reverse','restricted','residual','blackbox','pressure','switchboard','copycat','stacked','housekey','sleeve'],
+ say:{lightsout:'Lights off. No peeking.',dying:'The finish line keeps moving. Keep up.',sudden:'First one across wins. That is the whole rule.',distort:'Things slide around in here. Do not trust a line.',overdrive:'Bigger hands, double plays. More mess.',jam:'One line breaks every round. Guess which.',lockdown:'You get one lock. Use it before I use mine.',breach:'Delete something and something of yours flips. Fun, right?',deaddrop:'I already dealt some cards onto the table. Some are yours.',rapid:'Three cards. That is all you get.',open:'Show me yours, I will show you mine.',short:'Eight is enough tonight.',high:'Twelve. Ten was too easy.',reverse:'I shuffled your headers. You are welcome.',restricted:'Face-down only where you are losing. House policy.',residual:'The middle line pays out. If you can hold it.',blackbox:'Your first card? I picked it.',pressure:'One line is cheap each round. Watch which.',switchboard:'You can swap two headers once. So can I.',copycat:'Nice deck. Mine now.',stacked:'Every line has its own price tonight.',housekey:'I will hold the key. You do not mind.',sleeve:'Two extra cards? No idea where those came from.'},
+ trick:{housekey:'He is holding the Override Key.',sleeve:'He opens with two extra cards.'},
+ lines:{win:'Fine. That one was rigged in your favor. Probably.',lose:'Should have read the fine print.'}};
+FO_DATA.prof.Trickster={manualEscalateAt:.6,acceptAt:.36,abortBelow:.15,bluffChance:.22};
+function foCollinPort(){return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#d3d4d6"/><image href="art/collin.png" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" style="image-rendering:pixelated"/></svg>`}
 // ----- state -----
 const FO={
  st(){const d=PROF.d;const f=d.fo||(d.fo={season:0,rank:1,intel:0,omega:0,best:1,obest:0,claimed:{},recent:[],opn:0,pend:null,hist:[],met:{}});f.claimed=f.claimed||{};f.recent=f.recent||[];f.hist=f.hist||[];f.met=f.met||{};return f},
@@ -3788,9 +3796,22 @@ const FO={
   const exempt=(d.name||'').trim().toUpperCase()===FO_DATA.ike.ex;let op;
   const roll=exempt?1:rng();
   if(!exempt&&roll<FO_DATA.ike.p){op={opId,ike:1,oid:FO_DATA.ike.id,cn:FO_DATA.ike.cn,pf:FO_DATA.ike.pf,deck:this.ikeDeck(deck),lvl:3,band:this.band(f.rank)}}
+  else if(!exempt&&roll<FO_DATA.ike.p+FO_COLLIN.p){op=this.collinOp(opId,deck,rng,f)}
   else{const P=this.pick(f.rank,deck,rng);op={opId,oid:P.o.id,cn:P.o.cn,pf:P.o.pf,ci:P.ci,deck:[...P.c[3]],rate:P.c[4],band:P.c[0],lvl:this.lvlFor(f.rank)}}
   Object.assign(op,{me:deck,rank:f.rank,season:f.season,state:'locked',t:Date.now()});f.pend=op;PROF.save();return op},
- cfgFor(op){const tier=op.ike?5:[0,1,2,3,4,4][op.band-1]||0,back=op.ike?'eye':['olive','punch','radar','static','redstar','eye'][op.band-1]||'olive';
+ collinOp(opId,deck,rng,f){const C=FO_COLLIN,pick=a=>a[Math.floor(rng()*a.length)%a.length];const rule=pick(C.rules);
+  let ai;if(rule==='copycat')ai=[...deck];else{const pool=ALLP.filter(p=>CARDS[p]);ai=[];while(ai.length<3){const p=pick(pool);if(!ai.includes(p))ai.push(p)}}
+  const op={opId,collin:1,oid:C.id,cn:C.cn,pf:C.pf,deck:ai,lvl:2,band:this.band(f.rank),rule};
+  if(rule==='stacked'){const t=[8,10,12];for(let i=2;i>0;i--){const j=Math.floor(rng()*(i+1));[t[i],t[j]]=[t[j],t[i]]}op.lth=t}
+  if(!['housekey','sleeve','copycat'].includes(rule)&&rng()<.35)op.trick=rng()<.5?'housekey':'sleeve';
+  return op},
+ collinCfg(op){const C=FO_COLLIN,R=EVRULES[op.rule]||{n:op.rule,rx:{}},rx={...R.rx,id:op.rule,scnN:'COLLIN · '+R.n},mods={};
+  if(op.lth){rx.lth=[...op.lth];rx.boss='lines need '+op.lth.join(' · ')}
+  const tricks=[op.rule,op.trick].filter(Boolean);if(tricks.includes('housekey'))mods.aiKey=1;if(tricks.includes('sleeve'))mods.aiExtra=2;
+  if(op.trick)rx.boss=[rx.boss,C.trick[op.trick]].filter(Boolean).join(' · ');
+  return{mode:'ranked',opId:op.opId,decks:{me:[...op.me],ai:[...op.deck]},lvl:op.lvl,aiTier:4,aiBack:'static',aiVar:Object.fromEntries(op.deck.map(p=>[p,'negative'])),
+   opp:{name:op.cn,port:'fo-collin',bord:'circuit',pal:FO_PAL.Trickster},prof:op.pf,retArg:{res:1},rx,mods,intro:'COLLIN: “'+(C.say[op.rule]||'New rule.')+'”',lines:C.lines}},
+ cfgFor(op){if(op.collin)return this.collinCfg(op);const tier=op.ike?5:[0,1,2,3,4,4][op.band-1]||0,back=op.ike?'eye':['olive','punch','radar','static','redstar','eye'][op.band-1]||'olive';
   return{mode:'ranked',opId:op.opId,decks:{me:[...op.me],ai:[...op.deck]},lvl:op.lvl,aiTier:tier,aiBack:back,aiVar:op.ike?Object.fromEntries(op.deck.map(p=>[p,'gilded'])):{},
    opp:{name:op.cn,port:op.ike?'fo-ike':'fo-'+op.oid,bord:op.ike?'pyramid':['none','brass','chrome','circuit','laurel','pyramid'][op.band-1],pal:FO_PAL[op.pf]},prof:op.pf,retArg:{res:1}}},
  // ----- in-match stakes -----
@@ -3837,7 +3858,7 @@ const FO={
   f.hist.unshift({opId:op.opId,cn:op.cn,win:0,ab:'me',st,r1:res.r1,t:Date.now()});f.hist=f.hist.slice(0,20);f.recent.push(op.oid);f.recent=f.recent.slice(-10);f.met[op.oid]=1;f.lastRes={...res,win:0,ab:'me',stakes:st,cn:op.cn,ms};f.pend=null;PROF.save();return f.lastRes},
  settle(win,stakes,ab){const f=this.st(),op=f.pend;const res=this.apply(win?stakes:-stakes);const ms=this.milestones();
   f.hist.unshift({opId:op.opId,cn:op.cn,win:win?1:0,ab,st:stakes,r1:res.r1,t:Date.now()});f.hist=f.hist.slice(0,20);f.recent.push(op.oid);f.recent=f.recent.slice(-10);f.met[op.oid]=1;
-  f.lastRes={...res,win:win?1:0,ab,stakes,cn:op.cn,ike:op.ike,ms};f.pend=null;return f.lastRes}};
+  f.lastRes={...res,win:win?1:0,ab,stakes,cn:op.cn,ike:op.ike,collin:op.collin,ms};f.pend=null;return f.lastRes}};
 // engine hooks
 {const ng=newGame;newGame=function(cfg={}){ng(cfg);if(cfg.fixOrder)for(const w of['me','ai']){const P=S.p[w];P.protos=DECKS[w].map(n=>P.protos.find(p=>p.name===n))}if(cfg.mode==='ranked')S.fo={stakes:1,esc:{me:0,ai:0},auto:0,op:cfg.opId,log:[]}}}
 {const da=doAction;doAction=async function(w,a){if(a&&a.type==='abort')return;return da(w,a)}}
@@ -3877,18 +3898,18 @@ SCR.fieldops=(m,arg)=>{FO.check();const f=FO.st(),d=PROF.d,set=FO.seasonSet(),da
  m.querySelectorAll('.fo-m').forEach((el,i)=>el.onclick=()=>{const r=FO.reward(FO_MS[i],set);if(r.id&&typeof previewItem==='function'){AU.ui();previewItem(r.id)}});
  if(res&&!RM()){const b=m.querySelector('.fo-res');b&&b.animate([{transform:'translateY(10px)',opacity:0},{transform:'none',opacity:1}],{duration:400})}
  if(f.resetNote){f.resetNote=0;PROF.save()}};
-FO.resHTML=function(r){return`<div class="fo-res ${r.win?'w':'l'}"><small>LAST OPERATION · ${esc(r.cn)}${r.ike?' · CLASSIFIED':''}</small><b>${r.ab?(r.ab==='me'?'ABORTED':esc(String(r.cn||'MACHINE').toUpperCase())+' WITHDREW'):r.win?'SUCCESS':'FAILED'} · ${r.win?'+':'−'}${r.stakes} INTEL</b>
+FO.resHTML=function(r){return`<div class="fo-res ${r.win?'w':'l'}"><small>LAST OPERATION · ${esc(r.cn)}${r.ike?' · CLASSIFIED':r.collin?' · RIGGED':''}</small><b>${r.ab?(r.ab==='me'?'ABORTED':esc(String(r.cn||'MACHINE').toUpperCase())+' WITHDREW'):r.win?'SUCCESS':'FAILED'} · ${r.win?'+':'−'}${r.stakes} INTEL</b>
  <span>${r.r0===r.r1?(r.r1>=100?'OMEGA score '+r.o0+' → '+r.o1:'Rank '+r.r1+' · '+r.i1+'/3'):(r.r1>=100&&r.r0<100?'OMEGA REACHED':'Rank '+r.r0+' → '+r.r1)}</span>${r.ms&&r.ms.length?`<div>${r.ms.map(x=>`<em>RANK ${x.m}: ${esc(x.t)}</em>`).join('')}</div>`:''}</div>`};
 FO.queue=function(){const f=this.st();this.check();const d=PROF.d;if(!d.pick||new Set(d.pick).size!==3){toast2('Pick three Directives first');HUB.show('deck');return}
  if(f.pend){const op=f.pend;if(op.snap)return this.resumeSheet(op);return this.reveal(op,true)}
  const op=this.newOp();this.reveal(op)};
-FO.reveal=function(op,again){const o=document.createElement('div');o.className='fo-mm'+(op.ike?' ike':'');const deckH=op.deck.map(p=>`<div>${rectHTML(p,false,op.ike?'gilded':'')}</div>`).join('');
+FO.reveal=function(op,again){const o=document.createElement('div');o.className='fo-mm'+(op.ike?' ike':op.collin?' collin':'');const deckH=op.deck.map(p=>`<div>${rectHTML(p,false,op.ike?'gilded':op.collin?'negative':'')}</div>`).join('');
  o.innerHTML=`<div class="fo-mm-in"><small class="fo-mm-h">${again?'OPERATION '+String(op.opId).padStart(4,'0')+' · LOCKED':'LOCATING HOSTILE OPERATOR ...'}</small><div class="fo-mm-scan"><div class="fo-mm-roll"></div></div><div class="fo-mm-card" style="display:none">
-  ${op.ike?'<div class="fo-ike-st">CLASSIFIED ENCOUNTER</div>':''}<div class="fo-mm-top">${avatarHTML(op.ike?'fo-ike':'fo-'+op.oid,op.ike?'pyramid':['none','brass','chrome','circuit','laurel','pyramid'][op.band-1],86,FO_PAL[op.pf])}<div><small>${esc(op.oid)}${op.ike?' · THE UNRESTRICTED OPERATOR':''}</small><b>${esc(op.cn)}</b><span>${esc(op.pf.toUpperCase())} · ${DIFF[op.lvl][0]}</span>${op.rate?`<i>Reported deck rate ${op.rate}%</i>`:''}</div></div>
-  <div class="deck3">${deckH}</div><div class="fo-mm-st">STAKES: 1 INTEL · YOUR RANK ${op.rank}</div>
+  ${op.ike?'<div class="fo-ike-st">CLASSIFIED ENCOUNTER</div>':op.collin?'<div class="fo-ike-st fo-col-st">TRICKSTER ENCOUNTER</div>':''}<div class="fo-mm-top">${avatarHTML(op.ike?'fo-ike':op.collin?'fo-collin':'fo-'+op.oid,op.ike?'pyramid':op.collin?'circuit':['none','brass','chrome','circuit','laurel','pyramid'][op.band-1],86,FO_PAL[op.pf])}<div><small>${esc(op.oid)}${op.ike?' · THE UNRESTRICTED OPERATOR':op.collin?' · HE MAKES THE RULES':''}</small><b>${esc(op.cn)}</b><span>${esc(op.pf.toUpperCase())} · ${DIFF[op.lvl][0]}</span>${op.rate?`<i>Reported deck rate ${op.rate}%</i>`:''}</div></div>
+  ${op.collin?FO.collinRuleHTML(op):''}<div class="deck3">${deckH}</div><div class="fo-mm-st">STAKES: 1 INTEL · YOUR RANK ${op.rank}</div>
   <div class="fo-mm-b"><button class="ghost2" id="mmL">LATER</button><button class="big-btn" id="mmGo">ENGAGE</button></div><small class="fo-mm-n">This matchup is locked. Leaving keeps it waiting for you.</small></div></div>`;
  $('app').appendChild(o);const roll=o.querySelector('.fo-mm-roll');const names=FO_DATA.opps.map(x=>x.cn);let k=0;
- const show=()=>{clearInterval(iv);o.querySelector('.fo-mm-scan').remove();o.querySelector('.fo-mm-h').textContent='OPERATION '+String(op.opId).padStart(4,'0')+(op.ike?' · SECRET':' · MATCHED');const c=o.querySelector('.fo-mm-card');c.style.display='';AU.stamp&&AU.stamp();if(op.ike){CAM.shake&&!RM()&&CAM.shake(.6);AU.slam&&AU.slam(5,true,0)}if(!RM())c.animate([{transform:'scale(1.15) rotate(-2deg)',opacity:0},{transform:'none',opacity:1}],{duration:320,easing:'cubic-bezier(.3,1.3,.5,1)'})};
+ const show=()=>{clearInterval(iv);o.querySelector('.fo-mm-scan').remove();o.querySelector('.fo-mm-h').textContent='OPERATION '+String(op.opId).padStart(4,'0')+(op.ike?' · SECRET':op.collin?' · RIGGED':' · MATCHED');const c=o.querySelector('.fo-mm-card');c.style.display='';AU.stamp&&AU.stamp();if(op.ike){CAM.shake&&!RM()&&CAM.shake(.6);AU.slam&&AU.slam(5,true,0)}if(op.collin&&!RM()){AU.flip&&AU.flip();c.animate([{transform:'rotate(0)'},{transform:'rotate(-3deg)'},{transform:'rotate(3deg)'},{transform:'rotate(0)'}],{duration:500,delay:330})}if(!RM())c.animate([{transform:'scale(1.15) rotate(-2deg)',opacity:0},{transform:'none',opacity:1}],{duration:320,easing:'cubic-bezier(.3,1.3,.5,1)'})};
  const iv=setInterval(()=>{roll.textContent=names[(k++*7)%names.length];CUE.click(.15)},70);setTimeout(show,again||RM()?100:1300);
  o.querySelector('#mmL').onclick=()=>{AU.ui();o.remove();HUB.show('fieldops')};o.querySelector('#mmGo').onclick=()=>{AU.init();o.remove();const f=FO.st();if(f.pend)f.pend.state='launched';PROF.save();GAME.launch(FO.cfgFor(op),'fieldops')}};
 FO.resumeSheet=function(op){const st=(JSON.parse(op.snap).fo||{}).stakes||1;const o=document.createElement('div');o.className='stko';
@@ -3926,6 +3947,15 @@ GAME.quick=function(){FO.queue()};
 {const sh=srcHint;srcHint=function(id){return/^(port|bord|back):fos\d+$/.test(id)||FO_SEAS.some(([n])=>id==='title:'+FO_tc(n)+' Operative')?'FIELD OPERATIONS':sh(id)}}
 {const pd=pvDesc;pvDesc=function(id){const base=pd(id);const m=/^(port|bord|back):fos(\d+)$/.exec(id),t=FO_SEAS.findIndex(([n])=>id==='title:'+FO_tc(n)+' Operative');const k=m?+m[2]:t>=0?t+1:0;if(!k)return base;
  const rk={port:40,bord:90,back:100}[m?m[1]:'']||60;return`${base} Field Operations season reward (${FO_SEAS[k-1][0]}) for reaching Rank ${rk===100?'100 / OMEGA':rk}.`}}
+
+FO.collinRuleHTML=function(op){const R=EVRULES[op.rule]||{n:op.rule,short:''};const t=op.trick?FO_COLLIN.trick[op.trick]:'';
+ return`<div class="fo-col-rule"><small>COLLIN'S RULE</small><b>${esc(R.n)}</b><span>${esc(R.short)}${op.lth?' Tonight: '+op.lth.join(', ')+'.':''}</span>${t?`<span class="fo-col-x">Also: ${esc(t)}</span>`:''}<i>“${esc(FO_COLLIN.say[op.rule]||'')}”</i></div>`};
+{const st=document.createElement('style');st.textContent=`.fo-mm.collin{background:radial-gradient(circle at 50% 40%,#14240a,#030502 75%)}
+.fo-mm.collin .fo-mm-card{border-color:#a8e05a;box-shadow:0 0 30px rgba(168,224,90,.3);background:#0c1407}
+.fo-ike-st.fo-col-st{background:#5a8a1e;color:#f4ffd8;transform:rotate(-4deg)}
+.fo-col-rule{border:1px dashed #a8e05a;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:rgba(168,224,90,.06)}
+.fo-col-rule small{font:700 10px var(--disp);letter-spacing:.2em;color:#a8e05a}.fo-col-rule b{font:700 16px var(--disp);letter-spacing:.08em;color:#f4ffd8}
+.fo-col-rule span{font:12px/1.4 var(--type);color:#cfe6b0}.fo-col-rule .fo-col-x{color:#ffd58a}.fo-col-rule i{font:italic 12px var(--type);color:#9fbf7a}`;document.head.appendChild(st)}
 // ===== ANIMATED PROFILE FRAMES: 12 Transmission + 10 shop. Each is individually authored SVG; portrait sits at 0..100 =====
 let FRN=0;
 const FRSEED=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return()=>{h=(h*1103515245+12345)>>>0;return(h>>>8)/16777216}};
@@ -4576,6 +4606,10 @@ const EVRULES={
  residual:{n:'Residual Charge',fam:'Experiment',short:'After each round, if both sides show a face-up card in the middle line, both draw 1.',d:'After every full round, if both players have an uncovered face-up card in the middle line, each draws one card from their own deck. The hand limit still applies at your own hand check.',rx:{resid:1}},
  blackbox:{n:'Black Box',fam:'Experiment',short:'Your first play is a random card from your hand, face-down.',d:'The first normal play each player makes uses a random card from their own hand, placed face-down in the line they choose, if that\'s legal.',rx:{bb:1}},
  pressure:{n:'Pressure Chamber',fam:'Experiment',short:'Each round one line only needs 8 to compleat.',d:'At the start of each full round a line is marked, rotating left to right. That line compleats at 8 for the round; the other two still need 10.',rx:{press:1}},
+ copycat:{n:'Copycat',fam:'Trickster',short:'Collin plays your three Directives.',d:'Collin copies your Directive trio for this match. Same cards, separate decks.',rx:{cc:1}},
+ stacked:{n:'Loaded Scales',fam:'Trickster',short:'Each line needs a different total: 8, 10 or 12.',d:'The three lines compleat at 8, 10 and 12, in a random order. The number shows on each line total. You still have to be strictly ahead.',rx:{}},
+ housekey:{n:'House Rules',fam:'Trickster',short:'Collin starts holding the Override Key.',d:'Collin begins the match holding the Override Key. After that it moves the normal way.',rx:{}},
+ sleeve:{n:'Up His Sleeve',fam:'Trickster',short:'Collin opens with two extra cards.',d:'Collin draws two extra cards at the start. His hand limit is the same as yours.',rx:{}},
  switchboard:{n:'The Switchboard',fam:'Experiment',short:'Once a match, swap two of your own Directive headers.',d:'Once per match, before your play or refill, swap two of your own headers. Headers take their compleat status with them; the cards stay in their lines.',rx:{sw:1}}};
 const EVFLAG=['lightsout','dying','sudden','perm','distort','overdrive','jam','draft','mirror','machine','lockdown','breach'];
 const EVEXP=['deaddrop','rapid','open','short','high','longgame','reverse','restricted','residual','blackbox','pressure','switchboard'];
