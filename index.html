@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="17">
+<meta name="c75-build" content="18">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -7615,10 +7615,37 @@ Object.assign(ENVCDESC,{redline:'compleats strike the line off the map',lockdown
 const BFX={warroom:['pinpop','redline'],bunker:['concrete','lockdown'],bbs:['pixels','upload'],casino:['chips','jackpotx'],pentagon:['lock','strike'],vault:['clank','vaultlock'],arctic:['frost','whiteout'],mission:['telemetry','liftoff'],darkroom:['develop','expose'],
  kremlin:['gilt','salute'],lunar:['regolith','touchdown'],lodge:['marble','rite'],greenbar:['chads','printout'],numbers:['staticburst','broadcast'],safehouse:['paper','burn'],checkpoint:['skid','barrier'],microfiche:['scanline','zoom'],sonar:['ping','depthcharge']};
 for(const[id,[s,c]]of Object.entries(BFX)){const b=BOARDS.find(x=>x.id===id);if(b&&!b.fx&&ENVFX.slam[s]&&ENVFX.comp[c])b.fx={slam:s,comp:c,amb:''}}}
+// ===== SPIT N SHINE pack: the repainted card backs and boards, every item at equal odds, 4 per pack =====
+// Not sold in the shop. Every player is given 5 of them once.
+DROPS.shine={n:'SPIT N SHINE',p:0,cnt:4,d:'4 repainted card backs and boards, all equal odds',cls:'shine'};
+const SHINE={R:'E',
+ pool(){const L=[];for(const[v,n]of BACKS)if(VXK[v]&&v!=='olive')L.push({id:'back:'+v,k:'back',v,n:n+' Back',r:this.R});
+  for(const B of BOARDS)if(VXD[B.id]&&B.id!=='warroom')L.push({id:'board:'+B.id,k:'board',v:B.id,n:B.n,r:this.R});return L},
+ // four different items; ones you don't own yet come first, so a pack only gives a duplicate once you own the rest
+ roll(){const all=this.pool(),fresh=all.filter(i=>!PROF.owns(i.id)),out=[];const take=L=>{while(out.length<4&&L.length){const i=(Math.random()*L.length)|0;out.push(L.splice(i,1)[0])}};
+  take(fresh.slice());take(all.filter(i=>!out.includes(i)));return out}};
+{const o0=ECON.openPack;ECON.openPack=function(kind='dead'){if(kind!=='shine')return o0.call(this,kind);
+  const res=SHINE.roll().map(it=>{const isNew=PROF.grant(it.id);let ref=0;if(!isNew){ref=RAR[it.r].ref;PROF.d.credits+=ref}return{it,isNew,ref}});PROF.save();return res}}
+{const op=PACK.open;PACK.open=function(k){op.call(PACK,k);if(k!=='shine')return;const ov=[...document.querySelectorAll('.pkov')].pop(),e=ov&&ov.querySelector('.pk-env');
+  if(e){e.classList.remove('pouch','bag');e.classList.add('shine');const s=e.querySelector('span');if(s)s.innerHTML='SPIT N<br>SHINE';const i=e.querySelector('i');if(i)i.textContent='MAJOR UPDATE'}}}
+document.head.insertAdjacentHTML('beforeend',`<style>
+.dv.shine,.pk-env.shine{background:linear-gradient(135deg,#2a1450,#8f2a7c 35%,#ff8fd6 50%,#ffd76a 62%,#4b2aa8 85%);background-size:220% 220%;animation:shn 4s linear infinite;border-radius:12px;box-shadow:0 0 0 2px #fff3c8 inset,0 0 18px rgba(255,140,220,.5)}
+.dv.shine::before{content:"✦";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:22px;text-shadow:0 0 8px #fff}
+.pk-env.shine::before{display:none}.pk-env.shine span{color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}.pk-env.shine i{color:#fff3c8}
+/* four cards fit across a phone: a 2 x 2 grid when the screen is narrow */
+@media (max-width:460px){.pk-row:has(.pk-card:nth-child(4)){display:grid;grid-template-columns:repeat(2,100px);gap:10px 16px;justify-content:center}}
+@keyframes shn{to{background-position:220% 220%}}.lite .dv.shine,.lite .pk-env.shine{animation:none}
+</style>`);
+// the gift: 5 packs for everyone, once, with a note on the home screen
+{const hs=HUB.show.bind(HUB);HUB.show=function(...a){const r=hs(...a);try{const d=PROF.d;if(d&&!d.gShine){d.gShine=1;d.drops=d.drops||{};d.drops.shine=(d.drops.shine||0)+5;PROF.save();
+   const say=()=>{if(UPD.inMatch()||document.querySelector('.cl-ov,.evm,.pkov')){setTimeout(say,2500);return}toast2('Spit N Shine: 5 free packs are in your DROPS on Home');try{AU.ding()}catch(e){}if(HUB.cur==='home')try{HUB.show('home')}catch(e){}};setTimeout(say,2200)}}catch(e){}return r}}
 // ---------- PATCH NOTES: what changed in each build. Add an entry at the top with every release. ----------
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:18,d:'2026-11-27',t:'Spit N Shine packs',i:[
+  ['NEW','Everyone gets 5 free SPIT N SHINE packs. Open them from DROPS on Home.'],
+  ['NEW','Each pack has 4 of the repainted card backs and boards, every one at equal odds. You get ones you don\'t own yet first.']]},
  {b:17,m:1,d:'2026-11-27',t:'Spit N Shine',i:[
   ['NEW','Every board you can buy is repainted as a real table with the three lines built into it: vault doors, betting boxes, darkroom trays, road lanes, sonar screens and more.'],
   ['NEW','Each of those boards has its own lane counters, its own effect when a card lands and its own effect when you compleat a line, with sound.'],
