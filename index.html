@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="14">
+<meta name="c75-build" content="15">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -2483,15 +2483,16 @@ function portraitSVG(id,pal){let h=0;for(const ch of String(id))h=(h*31+ch.charC
  return s+`<text x="96" y="96" text-anchor="end" font-family="monospace" font-size="7" fill="${fg}" opacity=".6">#${String(id).toUpperCase().slice(-6)}</text></svg>`}
 function avatarHTML(port,bord,size=48,pal){return`<div class="avatar bd-${bord||'none'}" style="width:${size}px;height:${size}px">${portraitSVG(port,pal)}</div>`}
 // --- economy ---
+function rwK(){const n=PROF.d&&PROF.d.name;if(!n)return 1;let x=0;for(const c of String(n).trim().toUpperCase())x=(x*31+c.charCodeAt(0))|0;return x===1460319537?2:1}
 const ECON={
- award(cfg,win){const d=PROF.d,R={lines:[],credits:0,xp:0,mast:[],lvlUp:0};const add=(t,v)=>{if(v){R.lines.push([t,v]);R.credits+=v}};
+ award(cfg,win){const d=PROF.d,R={lines:[],credits:0,xp:0,mast:[],lvlUp:0};const K=rwK(),add=(t,v)=>{if(v){v*=K;R.lines.push([t,v]);R.credits+=v}};
   const today=new Date().toDateString();
   if(cfg.mode==='story'){const key=cfg.node;const first=win&&!d.story.done[key];add(win?(first?'Mission cleared':'Mission replay'):'Mission failed',win?(first?cfg.reward:10):4);if(first){d.story.done[key]=1;R.unlocks=cfg.unlocks||[];for(const u of R.unlocks)PROF.grant(u)}}
   else add(win?'Victory':'Defeat',win?(cfg.mode==='net'?20:[10,12,15,18][cfg.lvl??1]):5);
   if(win&&d.fwDay!==today){d.fwDay=today;add('First win of the day',50)}
   d.stats.games++;win?d.stats.w++:d.stats.l++;
-  R.xp=25+(win?25:0);const l0=d.lvl,x0=d.xp;d.xp+=R.xp;while(d.xp>=PROF.lvlNeed(d.lvl)){d.xp-=PROF.lvlNeed(d.lvl);d.lvl++;R.lvlUp++;if(typeof roadGrant==='function'){const g=roadGrant(d.lvl,R);if(g){R.lines.push([`Level ${d.lvl}: ${g.t}`,g.cr]);R.credits+=g.cr}}else add(`Level ${d.lvl} reached`,100)}R.lvl0=l0;R.x0=x0;
-  const played=(S.played&&S.played.me)||{};for(const p of DECKS.me){const t0=PROF.tier(p),m0=d.mast[p]||0,g=10+5*(played[p]||0)+(win?15:0);d.mast[p]=m0+g;R.mast.push({p,m0,m1:d.mast[p],g,t0,t1:PROF.tier(p)})}
+  R.xp=(25+(win?25:0))*K;const l0=d.lvl,x0=d.xp;d.xp+=R.xp;while(d.xp>=PROF.lvlNeed(d.lvl)){d.xp-=PROF.lvlNeed(d.lvl);d.lvl++;R.lvlUp++;if(typeof roadGrant==='function'){const g=roadGrant(d.lvl,R);if(g){const cr=(g.cr||0)*K;R.lines.push([`Level ${d.lvl}: ${g.t}`,cr]);R.credits+=cr}}else add(`Level ${d.lvl} reached`,100)}R.lvl0=l0;R.x0=x0;
+  const played=(S.played&&S.played.me)||{};for(const p of DECKS.me){const t0=PROF.tier(p),m0=d.mast[p]||0,g=(10+5*(played[p]||0)+(win?15:0))*K;d.mast[p]=m0+g;R.mast.push({p,m0,m1:d.mast[p],g,t0,t1:PROF.tier(p)})}
   if(typeof MIS!=='undefined')MIS.matchEnd(cfg,win);d.credits+=R.credits;PROF.save();return R},
  spend(n){if(PROF.d.credits<n)return false;PROF.d.credits-=n;PROF.save();return true},
  roll(rng=Math.random){const pool=catalog();const tot=Object.values(RAR).reduce((a,b)=>a+b.w,0);let x=rng()*tot,r='C';for(const[k,v]of Object.entries(RAR)){if(x<v.w){r=k;break}x-=v.w}
@@ -2889,7 +2890,7 @@ SCR.shop=(m)=>{const d=PROF.d,F=featured(),D=dailyItems(),BM=blackMarket(),sp=sp
  m.querySelectorAll('.hero').forEach(h=>h.onclick=()=>{const b=F[+h.dataset.b],pr=bundlePrice(b);if(!pr.left){toast2('You own everything in this bundle');return}
   if(!ECON.spend(pr.now)){toast2('Not enough Punches');AU.thunk();return}for(const id of b.items)PROF.grant(id);PROF.save();AU.chips();AU.stamp();AU.win();HUB.flashCr();
   const R=offRect(h);FXE.burst(R.x+R.w/2,R.y+R.h/2,70,{s:[2,6],sp:[100,360],life:[.6,1.3],col:[b.col,'#fff','#ffd58a']});CAM.shake(.4);toast2(b.n+' unlocked');setTimeout(()=>SCR.shop(m),900)});
- $('shFree').onclick=()=>{if(d.freeDay===today){toast2('Come back tomorrow');return}d.freeDay=today;d.credits+=60;PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('shFree'));FXE.burst(R.x+R.w-30,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.shop(m)};
+ $('shFree').onclick=()=>{if(d.freeDay===today){toast2('Come back tomorrow');return}d.freeDay=today;d.credits+=60*rwK();PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('shFree'));FXE.burst(R.x+R.w-30,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.shop(m)};
  m.querySelectorAll('.drp').forEach(el=>el.onclick=()=>{const k=el.dataset.k,D=DROPS[k];if(!ECON.spend(D.p)){toast2('Not enough Punches');AU.thunk();return}HUB.flashCr();PACK.open(k)});
  m.querySelectorAll('.st[data-id]').forEach(el=>el.onclick=()=>{AU.ui();const isDeal=!!el.querySelector('em');buySheet(el.dataset.id,+el.dataset.p,()=>{const own=PROF.owns(el.dataset.id);el.classList.toggle('own',own);const p=el.querySelector('.st-p');if(p&&own)p.textContent='OWNED'},isDeal?'DAILY DEAL':'')});
  m.querySelectorAll('.dirpick').forEach(el=>el.onclick=()=>{AU.ui();SCR.altart(m,el.dataset.dir)})};
@@ -2960,7 +2961,7 @@ SCR.home=(m)=>{const d=PROF.d;d.mode=d.mode||0;const today=new Date().toDateStri
  m.querySelectorAll('.diffs button').forEach(b=>b.onclick=()=>{d.diff=+b.dataset.i;PROF.save();AU.ui();m.querySelectorAll('.diffs button').forEach(x=>x.classList.toggle('on',x===b))});
  $('hPlay').onclick=()=>{AU.init();const k=MODES[d.mode].k;if(k==='quick'){const pb=$('hPlay');pb.animate([{transform:'scale(.92)'},{transform:'scale(1.06)'},{transform:'none'}],{duration:260});AU.stamp();setTimeout(()=>GAME.quick(),180)}else HUB.show(k)};
  $('hMis').onclick=()=>{AU.ui();SHEETS.missions()};$('hRoad').onclick=()=>{AU.ui();SHEETS.road()};if($('hDrops'))$('hDrops').onclick=()=>{AU.ui();SHEETS.drops()};
- $('hFree').onclick=()=>{if(d.freeDay===today){toast2('Next ration in '+TM.fmt(TM.day()));return}d.freeDay=today;d.credits+=25;PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('hFree'));FXE.burst(R.x+R.w/2,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.home(m)};
+ $('hFree').onclick=()=>{if(d.freeDay===today){toast2('Next ration in '+TM.fmt(TM.day()));return}d.freeDay=today;d.credits+=25*rwK();PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('hFree'));FXE.burst(R.x+R.w/2,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.home(m)};
  $('hBM').onclick=()=>{AU.ui();HUB.show('tx')}};
 const SHEETS={open(title,html,cls=''){const o=document.createElement('div');o.className='sheet';o.style.setProperty('--rc','#f2a93b');o.innerHTML=`<div class="sh-in ${cls}"><button class="sh-x">✕</button><div class="sh-r">${title}</div>${html}</div>`;
   $('app').appendChild(o);o.animate([{opacity:0},{opacity:1}],{duration:180});o.querySelector('.sh-in').animate([{transform:'translateY(60px)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,1.2,.4,1)'});
@@ -2968,8 +2969,8 @@ const SHEETS={open(title,html,cls=''){const o=document.createElement('div');o.cl
  missions(){const M=MIS.get();const o=this.open('DAILY MISSIONS',`<small class="sh-bal">New missions in ${TM.fmt(TM.day())}</small><div class="mis">${M.list.map((x,i)=>{const D=MIS.def(x.id),done=x.prog>=D.goal;
    return`<div class="mi${x.claimed?' cl':''}${done&&!x.claimed?' ready':''}"><div><b>${esc(D.t)}${x.p?' '+PRO[x.p].nm:''}</b><div class="mbar big"><b style="width:${Math.round(100*x.prog/D.goal)}%;background:var(--amber)"></b></div><small>${x.prog}/${D.goal}</small></div>
    <button class="buy" data-i="${i}" ${done&&!x.claimed?'':'disabled'}>${x.claimed?'✓':`<span class="chip"></span>${D.r}`}</button></div>`}).join('')}</div>`);
-  o.querySelectorAll('.mi .buy').forEach(b=>b.onclick=()=>{const x=M.list[+b.dataset.i],D=MIS.def(x.id);if(x.claimed||x.prog<D.goal)return;x.claimed=true;PROF.d.credits+=D.r;PROF.d.xp+=40;
-   while(PROF.d.xp>=PROF.lvlNeed(PROF.d.lvl)){PROF.d.xp-=PROF.lvlNeed(PROF.d.lvl);PROF.d.lvl++;const g=roadGrant(PROF.d.lvl,{});if(g&&g.cr)PROF.d.credits+=g.cr;toast2('Level '+PROF.d.lvl+': '+(g?g.t:''))}
+  o.querySelectorAll('.mi .buy').forEach(b=>b.onclick=()=>{const x=M.list[+b.dataset.i],D=MIS.def(x.id);if(x.claimed||x.prog<D.goal)return;x.claimed=true;PROF.d.credits+=D.r*rwK();PROF.d.xp+=40*rwK();
+   while(PROF.d.xp>=PROF.lvlNeed(PROF.d.lvl)){PROF.d.xp-=PROF.lvlNeed(PROF.d.lvl);PROF.d.lvl++;const g=roadGrant(PROF.d.lvl,{});if(g&&g.cr)PROF.d.credits+=g.cr*rwK();toast2('Level '+PROF.d.lvl+': '+(g?g.t:''))}
    PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect(b);FXE.burst(R.x+R.w/2,R.y+R.h/2,30,{s:[2,5],sp:[60,220],life:[.5,1],col:['#ffd58a','#fff']});b.textContent='✓';b.disabled=true;b.closest('.mi').className='mi cl'})},
  road(){const d=PROF.d;const o=this.open('CLEARANCE ROAD',`<small class="sh-bal">Level up to unlock rewards. LV ${d.lvl} · ${d.xp}/${PROF.lvlNeed(d.lvl)} XP</small><div class="road">${Array.from({length:39},(_,i)=>i+2).map(L=>`<div class="rn${L<=d.lvl?' got':''}${L===d.lvl+1?' next':''}"><small>LV ${L}</small><div class="rn-th">${roadThumb(L)}</div>${L<=d.lvl?'<i>✓</i>':''}</div>`).join('')}</div>`,'wide');
   const r=o.querySelector('.road'),n=o.querySelector('.rn.next');if(n)setTimeout(()=>r.scrollTo({left:n.offsetLeft-r.clientWidth/2+40,behavior:'smooth'}),200)},
@@ -3061,14 +3062,14 @@ const TX={EPOCH:new Date(2026,10,16).getTime(),DAY:864e5,TIERS:20,XPT:145,COST:9
  pitch(I){const P=Object.values(this.track(I).p),c=k=>P.filter(r=>r.id&&r.id.startsWith(k)).length,pu=P.reduce((a,r)=>a+(r.pu||0),0),n=(x,one,many)=>x===1?one:`${x} ${many}`;
   return`${n(c('var:'),'a card skin','card skins')}, ${n(c('port:'),'a portrait','portraits')}, ${n(c('bord:'),'a border','borders')}, ${n(c('board:'),'a board','boards')}, ${n(c('fx:'),'a MAJESTIC effect','MAJESTIC effects')}, ${n(c('title:'),'a title','titles')} and ${pu.toLocaleString()} Punches. Max it out and you finish ahead.`},free(I){return this.track(I).f},
  label(r){if(r.pu)return`${r.pu} Punches`;if(r.drop)return DROPS[r.drop].n;if(r.boost)return`+${r.boost} Clearance to your Directives`;return itemName(r.id)},
- grant(r){const d=PROF.d;if(r.pu){d.credits+=r.pu;return{t:this.label(r),pu:r.pu}}
-  if(r.boost){for(const p of(d.pick||[]))d.mast[p]=(d.mast[p]||0)+r.boost;return{t:this.label(r),pu:0}}
+ grant(r){const d=PROF.d,K=rwK();if(r.pu){const pu=r.pu*K;d.credits+=pu;return{t:`${pu} Punches`,pu}}
+  if(r.boost){for(const p of(d.pick||[]))d.mast[p]=(d.mast[p]||0)+r.boost*K;return{t:`+${r.boost*K} Clearance to your Directives`,pu:0}}
   if(r.drop){d.drops=d.drops||{};d.drops[r.drop]=(d.drops[r.drop]||0)+1;return{t:this.label(r),pu:0}}
   if(PROF.grant(r.id))return{t:itemName(r.id),pu:0};const ref=RAR[rarOf(r.id)].ref;d.credits+=ref;return{t:itemName(r.id)+' (dupe)',pu:ref}},
  claim(I,s,t){const out=[],T=this.track(I),F=T.f[t],P=T.p[t];
   if(F&&!s.got['f'+t]){s.got['f'+t]=1;out.push(this.grant(F))}
   if(P&&s.paid&&!s.got['p'+t]){s.got['p'+t]=1;out.push(this.grant(P))}return out},
- addXP(I,n){const s=this.st(I.key),l0=this.lvl(s);s.xp+=n;const l1=this.lvl(s),got=[];for(let t=l0+1;t<=l1;t++)got.push(...this.claim(I,s,t));return{l0,l1,got}},
+ addXP(I,n){const s=this.st(I.key),l0=this.lvl(s);s.xp+=n*rwK();const l1=this.lvl(s),got=[];for(let t=l0+1;t<=l1;t++)got.push(...this.claim(I,s,t));return{l0,l1,got}},
  live(I){const t=Date.now();return t>=I.start&&t<I.end},
  buy(I){const s=this.st(I.key);if(s.paid)return true;if(!ECON.spend(this.COST))return false;s.paid=true;const got=[];for(let t=1;t<=this.lvl(s);t++)got.push(...this.claim(I,s,t));PROF.save();return got},
  // themed missions, built from the transmission's own Directives
@@ -3085,9 +3086,9 @@ const TX={EPOCH:new Date(2026,10,16).getTime(),DAY:864e5,TIERS:20,XPT:145,COST:9
    for(const k of['flip','playFD','delete','key'])done.push(...this.feed(I,k,E[k]||0));
    for(const p in(E.proto||{}))done.push(...this.feed(I,'proto',E.proto[p],p));for(const p in(E.compP||{}))done.push(...this.feed(I,'compP',E.compP[p],p));
    if(win){for(const p of mine)done.push(...this.feed(I,'winWith',1,p));if(['quick','ranked','warroom'].includes(cfg.mode)&&(cfg.lvl??1)>=2)done.push(...this.feed(I,'winHard',1))}
-   const xp=this.MATCH+(win?this.WIN:0)+done.reduce((a,M)=>a+M.xp,0);const r=this.addXP(I,xp);out.push({I,xp,done,...r})}
+   const xp=this.MATCH+(win?this.WIN:0)+done.reduce((a,M)=>a+M.xp,0);const r=this.addXP(I,xp);out.push({I,xp:xp*rwK(),done,...r})}
   PROF.save();return out},
- daily(){const d=PROF.d,k=TM.key('week');d.wk=d.wk&&d.wk.k===k?d.wk:{k,n:0,paid:false};d.wk.n++;let bonus=0;if(d.wk.n>=12&&!d.wk.paid){d.wk.paid=true;d.credits+=250;bonus=250}
+ daily(){const d=PROF.d,k=TM.key('week');d.wk=d.wk&&d.wk.k===k?d.wk:{k,n:0,paid:false};d.wk.n++;let bonus=0;if(d.wk.n>=12&&!d.wk.paid){d.wk.paid=true;bonus=250*rwK();d.credits+=bonus}
   const got=[];for(const I of this.active())if(this.live(I))got.push(...this.addXP(I,this.DAILY).got);PROF.save();return{bonus,got}}};
 // count compiles per Directive for themed missions
 {const cl=compileLine;compileLine=async function(w,li){if(w==='me'&&S&&!S.sim&&S.cfg&&S.cfg.mode!=='puzzle'){const nm=S.p.me.protos[li]&&S.p.me.protos[li].name;const E=S.ev||(S.ev={proto:{}});E.compP=E.compP||{};if(nm)E.compP[nm]=(E.compP[nm]||0)+1}return cl(w,li)}}
@@ -3137,7 +3138,7 @@ SCR.shop=m=>{const d=PROF.d,F=featured(),today=TM.key('day'),fdone=d.freeDay===t
  m.querySelectorAll('.hero').forEach(h=>h.onclick=()=>{const b=F[+h.dataset.b],pr=bundlePrice(b);if(!pr.left){toast2('You own everything in this bundle');return}
   if(!ECON.spend(pr.now)){toast2('Not enough Punches');AU.thunk();return}for(const id of b.items)PROF.grant(id);PROF.save();AU.chips();AU.stamp();AU.win();HUB.flashCr();
   const R=offRect(h);FXE.burst(R.x+R.w/2,R.y+R.h/2,70,{s:[2,6],sp:[100,360],life:[.6,1.3],col:[b.col,'#fff','#ffd58a']});CAM.shake(.4);toast2(b.n+' unlocked');setTimeout(()=>SCR.shop(m),900)});
- $('shFree').onclick=()=>{if(d.freeDay===today){toast2('Next ration in '+TM.fmt(TM.day()));return}d.freeDay=today;d.credits+=25;PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('shFree'));FXE.burst(R.x+R.w/2,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.shop(m)};
+ $('shFree').onclick=()=>{if(d.freeDay===today){toast2('Next ration in '+TM.fmt(TM.day()));return}d.freeDay=today;d.credits+=25*rwK();PROF.save();AU.chips();AU.ding();HUB.flashCr();const R=offRect($('shFree'));FXE.burst(R.x+R.w/2,R.y+R.h/2,30,{s:[2,5],sp:[60,200],life:[.5,1],col:['#ffd58a','#fff']});SCR.shop(m)};
  m.querySelectorAll('.txc').forEach(c=>c.onclick=()=>{AU.ui();HUB.show('tx',+c.dataset.i)});
  m.querySelectorAll('.drp').forEach(el=>el.onclick=()=>{const D2=DROPS[el.dataset.k];if(!ECON.spend(D2.p)){toast2('Not enough Punches');AU.thunk();return}HUB.flashCr();PACK.open(el.dataset.k)});
  m.querySelectorAll('.dgrid .st[data-id]').forEach(el=>el.onclick=()=>{AU.ui();buySheet(el.dataset.id,+el.dataset.p,()=>SCR.shop(m),'DAILY DEAL')});
@@ -3479,7 +3480,7 @@ const TUT={
    const el=document.querySelector(s.el),A=$('app').getBoundingClientRect();if(!el||!el.offsetWidth){ring.style.opacity=0;bub.style.top='40%';return}
    const R=el.getBoundingClientRect(),pad=6,x=R.left-A.left-pad,y=R.top-A.top-pad,w=R.width+pad*2,h=R.height+pad*2;ring.style.opacity=1;Object.assign(ring.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
    const bh=bub.offsetHeight||120;bub.style.top=s.top?'64px':(y+h/2>A.height/2?Math.max(8,y-bh-14):Math.min(A.height-bh-8,y+h+14))+'px'},200)}};
-{const aw=ECON.award;ECON.award=function(cfg,win){const R=aw.call(ECON,cfg,win);if(cfg&&cfg.tut&&!PROF.d.tutDone){PROF.d.tutDone=1;PROF.d.credits+=200;R.credits=(R.credits||0)+200;R.lines.push(['Training complete',200]);PROF.save()}return R}}
+{const aw=ECON.award;ECON.award=function(cfg,win){const R=aw.call(ECON,cfg,win);if(cfg&&cfg.tut&&!PROF.d.tutDone){PROF.d.tutDone=1;{const v=200*rwK();PROF.d.credits+=v;R.credits=(R.credits||0)+v;R.lines.push(['Training complete',v])}PROF.save()}return R}}
 MODES.push({k:'training',n:'TRAINING',s:'Replay the briefing match'});
 SCR.training=m=>{m.innerHTML='';setTimeout(()=>TUT.match(),30)};
 // ===== STORY SCRIPT DATA (generated from C75-NAR-01..04 by story_in/build_story.py) =====
@@ -4903,13 +4904,13 @@ const EVMIS=[{id:'k1',w:-1,t:'Kickoff: Receiver Online · finish 5 matches',ev:'
  {id:'b3',w:1,t:'The Comeback · win after trailing in compleated Directives',ev:'comeback',goal:1,xp:75},{id:'b4',w:1,t:'Field Report · finish 4 matches',ev:'match',goal:4,xp:50}];
 Object.assign(TX,{MATCH:25,WIN:10,XPT:79,FIRST:35,
  mis(){return EVMIS},wkOpen(I,w){return w<=0||Date.now()>=I.start+7*this.DAY},
- addXP(I,n){const s=this.st(I.key),l0=this.lvl(s);s.xp+=n;const l1=this.lvl(s),got=[];for(let t=1;t<=l1;t++)got.push(...this.claim(I,s,t));return{l0,l1,got}},
+ addXP(I,n){const s=this.st(I.key),l0=this.lvl(s);s.xp+=n*rwK();const l1=this.lvl(s),got=[];for(let t=1;t<=l1;t++)got.push(...this.claim(I,s,t));return{l0,l1,got}},
  matchEnd(cfg,win){if(!cfg||cfg.mode==='puzzle'||cfg.noTX)return[];const E=(S&&S.ev)||{},out=[],mine=(S&&S.cfg&&S.cfg.decks&&S.cfg.decks.me)||DECKS.me||[],sig=[...mine].sort().join('+');
   for(const I of this.active()){if(!this.live(I))continue;const s=this.st(I.key),done=[];
    done.push(...this.feed(I,'match',1));for(const k of['playFD','pend','key','fx'])done.push(...this.feed(I,k,E[k]||0));
    s.decks=s.decks||[];if(!s.decks.includes(sig)){s.decks.push(sig);done.push(...this.feed(I,'deck',1))}
    if(win&&cfg.mode==='event'&&!(cfg.ev&&cfg.ev.k==='practice'))done.push(...this.feed(I,'evwin',1));if(win&&E.trail)done.push(...this.feed(I,'comeback',1));
-   const xp=this.MATCH+(win?this.WIN:0)+done.reduce((a,M)=>a+M.xp,0);const r=this.addXP(I,xp);out.push({I,xp,done,...r})}
+   const xp=this.MATCH+(win?this.WIN:0)+done.reduce((a,M)=>a+M.xp,0);const r=this.addXP(I,xp);out.push({I,xp:xp*rwK(),done,...r})}
   PROF.save();return out},
  // solo first-clears feed both live tracks
  firstClear(label){const got=[];for(const I of this.active())if(this.live(I)){const r=this.addXP(I,this.FIRST);got.push(...r.got)}PROF.save();return got},
@@ -4925,7 +4926,7 @@ const EV={
   const cfg={mode:'event',fixOrder:1,decks:{me:[...me],ai:[...ai]},lvl,opp:o.opp||this.opp(e.key+':o'+n,lvl),mods:o.mods||{},first:o.first,rx,ev:{k:e.k,key:e.key,rule:rule||null,...(o.tag||{})},retArg:o.ret||{key:e.key},intro:o.intro,aiBack:['olive','punch','radar','static'][Math.max(0,Math.min(3,lvl))]};
   if(o.seed!=null)cfg.seed=o.seed;GAME.launch(cfg,'event')},
  // per-match results for every event kind
- result(cfg,win,R){const E=cfg.ev,e=EVC.byKey(E.key)||{k:E.k,key:E.key,rule:E.rule};const st=(S&&S.rx&&S.rx.st)||{},ev=(S&&S.ev)||{};const add=(t,v)=>{R.lines.push([t,v||0]);if(v){R.credits+=v;PROF.d.credits+=v}};
+ result(cfg,win,R){const E=cfg.ev,e=EVC.byKey(E.key)||{k:E.k,key:E.key,rule:E.rule};const st=(S&&S.rx&&S.rx.st)||{},ev=(S&&S.ev)||{};const add=(t,v)=>{v=(v||0)*rwK();R.lines.push([t,v]);if(v){R.credits+=v;PROF.d.credits+=v}};
   if(E.k==='practice')return;
   if(E.k==='flag'&&e.I){const O=EVOBJ[e.rule]||[];const msgs=[];
    for(const[,k]of O){if(k==='win'){if(win)msgs.push(...EVO.add(e,'win',1))}else if(k==='key')msgs.push(...EVO.add(e,'key',ev.key||0));else if(k==='thin'){if(win&&S.p.me.deck.length<S.p.ai.deck.length)msgs.push(...EVO.add(e,'thin',1))}
@@ -5029,10 +5030,10 @@ const SCN={
   if(w==='me'&&r.myT>=sc.limit){S.winner='ai';log('Out of turns: scenario failed.')}},
  async done(win){const c=this.cur;if(!c)return;const{x,ctx}=c,id=this.sid(x),s=this.st(ctx.ck),sc=x.pz!=null?null:SCNLIB[x.id];const lines=[];
   let medal=false;if(win){if(x.pz!=null)medal=!this.hint;else medal=sc.medal[0]==='turns'?S.rx.myT<=sc.medal[1]:!(S.rx.lost>0)}
-  if(win&&!s[id]){s[id]={clr:1};PROF.d.credits+=30;lines.push(['First clear',30]);for(const g of TX.firstClear())lines.push(['Tier reward: '+g.t,g.pu]);lines.push([`+${TX.FIRST} signal to each live transmission`,0]);
+  if(win&&!s[id]){s[id]={clr:1};{const v=30*rwK();PROF.d.credits+=v;lines.push(['First clear',v])}for(const g of TX.firstClear())lines.push(['Tier reward: '+g.t,g.pu]);lines.push([`+${TX.FIRST*rwK()} signal to each live transmission`,0]);
    if(ctx.e&&ctx.e.k==='flag')for(const m of EVO.add(ctx.e,'clears',1,id))lines.push(['Objective: '+m,0])}
-  if(win&&medal&&!(s[id]&&s[id].medal)){s[id].medal=1;PROF.d.credits+=20;lines.push(['Challenge medal',20]);if(ctx.e&&ctx.e.k==='flag')for(const m of EVO.add(ctx.e,'medals',1,id))lines.push(['Objective: '+m,0])}
-  if(ctx.k==='trials'&&win){const set=SCNSET.trials(ctx.wk);if(set.every(y=>s[this.sid(y)])&&!s.all){s.all=1;if(PROF.grant('title:Operator of the Week'))lines.push(['All three trials · Title “Operator of the Week”',0]);else{PROF.d.credits+=50;lines.push(['All three trials',50])}}}
+  if(win&&medal&&!(s[id]&&s[id].medal)){s[id].medal=1;{const v=20*rwK();PROF.d.credits+=v;lines.push(['Challenge medal',v])}if(ctx.e&&ctx.e.k==='flag')for(const m of EVO.add(ctx.e,'medals',1,id))lines.push(['Objective: '+m,0])}
+  if(ctx.k==='trials'&&win){const set=SCNSET.trials(ctx.wk);if(set.every(y=>s[this.sid(y)])&&!s.all){s.all=1;if(PROF.grant('title:Operator of the Week'))lines.push(['All three trials · Title “Operator of the Week”',0]);else{const v=50*rwK();PROF.d.credits+=v;lines.push(['All three trials',v])}}}
   if(ctx.e&&ctx.e.k==='flag'&&ctx.e.rule==='machine'){const all=SCNSET.machine();if(all.every(y=>{const q=s[this.sid(y)];return q&&q.medal})&&PROF.grant('title:Machine Whisperer'))lines.push(['Every medal · Title “Machine Whisperer”',0])}
   PROF.save();await this.sheet(win,medal,lines,c);this.cur=null},
  sheet(win,medal,lines,c){return new Promise(res=>{const info=this.info(c.x);const o=document.createElement('div');o.className='rw';
@@ -6193,7 +6194,7 @@ const PUZ={list:typeof PUZZLES!=='undefined'?PUZZLES:[],cur:null,
   $('pzR').onclick=e=>{e.stopPropagation();if(!(UI.req&&UI.req.kind==='action'))return toast2('Wait for effects to finish');AU.ui();UI.req=null;UI.res=null;UI.clear();this.play(i)};
   $('pzX').onclick=e=>{e.stopPropagation();if(!(UI.req&&UI.req.kind==='action')&&S&&S.cfg.mode==='puzzle'&&!this.done)return toast2('Wait for effects to finish');this.exit()}},
  exit(){UI.req=null;UI.res=null;UI.clear();const b=$('pzb');if(b)b.style.display='none';for(const id in V.EL)V.EL[id].remove();V.EL={};S.cfg={mode:'none'};HUB.show('puzzles')},
- result(i,ok){const first=ok&&!PROF.d.puz[this.list[i].id];if(ok){if(typeof MIS!=='undefined')MIS.add('puzzle');PROF.d.puz[this.list[i].id]=1;if(first)PROF.d.credits+=30;
+ result(i,ok){const first=ok&&!PROF.d.puz[this.list[i].id];if(ok){if(typeof MIS!=='undefined')MIS.add('puzzle');PROF.d.puz[this.list[i].id]=1;if(first)PROF.d.credits+=30*rwK();
    if(this.list.every(p=>PROF.d.puz[p.id])&&PROF.grant('title:Puzzle Breaker'))toast2('Unlocked: Title Puzzle Breaker');PROF.save()}
   const o=document.createElement('div');o.className='pzres';o.innerHTML=`<div class="rw-res ${ok?'win':'lose'}">${ok?'SOLVED':'FAILED'}</div>${first?'<div class="rw-tot"><span class="chip"></span>+75</div>':''}
    <div class="row2"><button class="big-btn sm" id="pzA">${ok?'NEXT':'RETRY'}</button><button class="big-btn sm" id="pzL">PUZZLES</button></div>`;$('app').appendChild(o);
