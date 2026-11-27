@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="12">
+<meta name="c75-build" content="13">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -3912,10 +3912,10 @@ SCR.fieldops=(m,arg)=>{FO.check();const f=FO.st(),d=PROF.d,set=FO.seasonSet(),da
  ${res?FO.resHTML(res):''}
  <div class="c2h">YOUR DIRECTIVES <button class="lnk" id="foE">EDIT ›</button></div><div class="deck3">${d.pick.map(p=>`<div>${rectHTML(p,false)}</div>`).join('')}</div>
  <button class="big-btn wide" id="foGo">${f.pend?'RESUME OPERATION':'QUEUE OPERATION'}</button>
- <div class="fo-how"><b>STAKES</b> Every operation starts at 1 Intel. Each side may ESCALATE once (×2). The first second-Directive compleat doubles it automatically. Max 8. ABORT ends the operation and pays the locked stakes to the other side. Early aborts pay no match rewards; after a second Directive is compleated (or turn 20) normal rewards still apply.</div>
+ <button class="fo-howb" id="foHow"><i>i</i>How stakes work</button>
  <div class="c2h">SEASON ${f.season} REWARDS</div><div class="fo-ms">${FO_MS.map(x=>{const r=FO.reward(x,set),got=f.claimed[x];return`<div class="fo-m${got?' got':''}${f.rank>=x?' hit':''}"><span>${x===100?'Ω':x}</span><div>${r.id?itemThumb(r.id,34):r.pu?`<div class="fo-pu"><span class="chip"></span>${r.pu}</div>`:r.drop?`<div class="dv ${DROPS[r.drop].cls} sm"></div>`:`<div class="fo-pu">▲${r.boost}</div>`}</div><small>${esc(FO.rlabel(r))}</small><i>${got?'✓':''}</i></div>`}).join('')}</div>
  <div class="fo-foot">Operators encountered: ${Object.keys(f.met).length} / ${FO_DATA.opps.length}${f.hist.length?` · last ${Math.min(10,f.hist.length)}: ${f.hist.slice(0,10).map(h=>h.win?'W':'L').join('')}`:''}</div>`;
- $('foB').onclick=()=>{AU.ui();HUB.show('home')};$('foW').onclick=()=>{AU.ui();HUB.show('warroom')};$('foE').onclick=()=>{AU.ui();HUB.show('deck')};$('foGo').onclick=()=>{AU.init();FO.queue()};
+ $('foB').onclick=()=>{AU.ui();HUB.show('home')};$('foW').onclick=()=>{AU.ui();HUB.show('warroom')};$('foE').onclick=()=>{AU.ui();HUB.show('deck')};$('foGo').onclick=()=>{AU.init();FO.queue()};$('foHow').onclick=()=>{AU.ui();FO.howStakes()};
  m.querySelectorAll('.fo-m').forEach((el,i)=>el.onclick=()=>{const r=FO.reward(FO_MS[i],set);if(r.id&&typeof previewItem==='function'){AU.ui();previewItem(r.id)}});
  if(res&&!RM()){const b=m.querySelector('.fo-res');b&&b.animate([{transform:'translateY(10px)',opacity:0},{transform:'none',opacity:1}],{duration:400})}
  if(f.resetNote){f.resetNote=0;PROF.save()}};
@@ -3977,6 +3977,23 @@ FO.collinRuleHTML=function(op){const R=EVRULES[op.rule]||{n:op.rule,short:''};co
 .fo-col-rule{border:1px dashed #a8e05a;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:rgba(168,224,90,.06)}
 .fo-col-rule small{font:700 10px var(--disp);letter-spacing:.2em;color:#a8e05a}.fo-col-rule b{font:700 16px var(--disp);letter-spacing:.08em;color:#f4ffd8}
 .fo-col-rule span{font:12px/1.4 var(--type);color:#cfe6b0}.fo-col-rule .fo-col-x{color:#ffd58a}.fo-col-rule i{font:italic 12px var(--type);color:#9fbf7a}`;document.head.appendChild(st)}
+
+// how stakes work: a short sheet instead of a paragraph on the screen
+FO.howStakes=function(){const o=document.createElement('div');o.className='evm fo-hs';
+ const L=[['Intel','Every operation is played for Intel. Win and you gain the stakes, lose and you drop them. Every 3 Intel is one rank.'],
+  ['Starts at 1','Each operation begins worth 1 Intel.'],
+  ['Escalate','ESCALATE doubles the stakes. Each side can do it once, and the other side has to accept or abort.'],
+  ['Automatic','The first time anyone compleats a second Directive, the stakes double on their own.'],
+  ['Max 8','An operation is never worth more than 8 Intel.'],
+  ['Abort','ABORT gives up and hands over the current stakes. Abort early and nobody gets match rewards. After a second compleat or turn 20, normal rewards still pay out.']];
+ o.innerHTML=`<div class="evm-b"><small>FIELD OPERATIONS</small><b>How stakes work</b><div class="hs-l">${L.map(([k,t])=>`<div><span>${k}</span><p>${t}</p></div>`).join('')}</div><button class="big-btn wide sm" data-x>GOT IT</button></div>`;
+ $('app').appendChild(o);o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]')){AU.ui();o.remove()}}};
+{const st=document.createElement('style');st.textContent=`.fo-howb{display:flex;align-items:center;gap:8px;margin:10px auto 16px;padding:6px 12px;background:none;border:0;color:#c9b88a;font:600 12px var(--type);letter-spacing:.04em;cursor:pointer}
+.fo-howb i{display:inline-grid;place-items:center;width:18px;height:18px;border:1.5px solid #c9a86a;border-radius:50%;font:700 11px/1 var(--disp);font-style:normal;color:#e8c878}
+.fo-howb:active{opacity:.7}
+.fo-hs .hs-l{display:flex;flex-direction:column;gap:10px;margin:12px 0 16px;text-align:left}
+.fo-hs .hs-l span{display:block;font:700 11px var(--disp);letter-spacing:.16em;color:#e8c878;text-transform:uppercase;margin-bottom:2px}
+.fo-hs .hs-l p{margin:0;font:13px/1.45 var(--type);color:#d8cfb8}`;document.head.appendChild(st)}
 // ===== ANIMATED PROFILE FRAMES: 12 Transmission + 10 shop. Each is individually authored SVG; portrait sits at 0..100 =====
 let FRN=0;
 const FRSEED=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return()=>{h=(h*1103515245+12345)>>>0;return(h>>>8)/16777216}};
@@ -6637,10 +6654,16 @@ SCR.board=m=>{const d=PROF.d;
 {const ap=FO.apply.bind(FO);FO.apply=function(...a){const r=ap(...a);LB.soon();return r}}
 setTimeout(()=>LB.push(),5000);
 // a way in from Field Operations
-{const fo=SCR.fieldops;SCR.fieldops=(m,arg)=>{fo(m,arg);const rk=m.querySelector('.fo-rank');if(!rk||!LB.on())return;const b=document.createElement('button');b.className='ghost2 lb-go';b.innerHTML='<b>LEADERBOARD</b><small>See where your friends stand</small>';
+{const fo=SCR.fieldops;SCR.fieldops=(m,arg)=>{fo(m,arg);const rk=m.querySelector('.fo-rank');if(!rk||!LB.on())return;const b=document.createElement('button');b.className='lb-go';const c=LB.cached(FO.st().season),me=PROF.d.lb&&PROF.d.lb.id;let sub='See where your friends stand';
+  if(c&&c.a&&c.a.length){const i=c.a.findIndex(x=>x.id===me);sub=i>=0?`You're #${i+1} of ${c.a.length}`:`${c.a.length} operator${c.a.length>1?'s':''} ranked`}
+  b.innerHTML=`<span class="lb-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 21V10h6v11M3 21v-6h6M15 21v-8h6v8M2 21h20"/></svg></span><span class="lb-tx"><b>LEADERBOARD</b><small>${sub}</small></span><span class="lb-ch">›</span>`;
  rk.after(b);b.onclick=()=>{AU.ui();HUB.show('board')}}}
 {const st=document.createElement('style');st.textContent=`
-.lb-go{display:flex;width:100%;justify-content:space-between;align-items:center;padding:12px 14px;margin:-4px 0 12px}.lb-go b{font:700 14px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-go small{color:#a89c7c}
+.lb-go{display:flex;width:100%;align-items:center;gap:12px;padding:12px 14px;margin:-4px 0 12px;border-radius:12px;border:1px solid rgba(232,192,110,.55);background:linear-gradient(180deg,rgba(232,192,110,.14),rgba(232,192,110,.05));box-shadow:inset 0 1px 0 rgba(255,230,170,.12);cursor:pointer;text-align:left;transition:transform .12s,background .12s}
+.lb-go:active{transform:scale(.985);background:linear-gradient(180deg,rgba(232,192,110,.22),rgba(232,192,110,.08))}
+.lb-go .lb-ic{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:rgba(232,192,110,.14);color:#ffd58a;flex:none}
+.lb-go .lb-tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.lb-go .lb-ch{font:400 26px/1 var(--disp);color:#ffd58a;flex:none;margin-right:2px}.lb-go b{font:700 14px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-go small{color:#d8c89a;font:12px var(--type)}
 .lb-rf{font-size:18px;min-width:40px}.lb-rf.spin{animation:lbspin .8s linear infinite}@keyframes lbspin{to{transform:rotate(360deg)}}
 .lb-r{padding:8px 10px;margin-bottom:6px;border-radius:9px;background:#14120d;border:1px solid #2a261a;cursor:pointer}.lb-top{display:flex;align-items:center;gap:10px}
 .lb-mini{display:flex;align-items:center;gap:4px;margin-top:3px}.lb-mini em{font:normal 10px var(--mono);color:#a89c7c;margin-left:4px;letter-spacing:.04em}
@@ -6657,10 +6680,24 @@ setTimeout(()=>LB.push(),5000);
 .lb-name{position:fixed;inset:0;z-index:9500;background:rgba(5,4,3,.82);display:flex;align-items:center;justify-content:center;padding:20px}
 .lb-nb{width:min(380px,92vw);background:#14120d;border:1px solid #b08a46;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}.lb-nb b{font:700 16px var(--disp);letter-spacing:.14em;color:#ffd58a}.lb-nb small{color:#a89c7c}
 .lb-nb input{font:700 20px var(--disp);letter-spacing:.12em;text-transform:uppercase;padding:10px 12px;border-radius:8px;border:1px solid #4b5034;background:#0b0a08;color:#efe5cc;user-select:text;-webkit-user-select:text}`;document.head.appendChild(st)}
+
+// a RANKS tile on the home screen, next to RATION / TRANSMIT / EVENTS
+{const h=SCR.home;SCR.home=m=>{h(m);if(!LB.on())return;const R=m.querySelector('.h2-right');if(!R)return;
+ const b=document.createElement('button');b.className='fab lb-fab';const sub=()=>{const f=FO.st(),c=LB.cached(f.season),me=PROF.d.lb&&PROF.d.lb.id;
+  if(c&&c.a&&c.a.length){const i=c.a.findIndex(x=>x.id===me);if(i>=0)return`#${i+1} OF ${c.a.length}`}return f.rank>=100?'OMEGA':'RANK '+f.rank};
+ const draw=()=>{b.innerHTML=`<i><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 21V10h6v11M3 21v-6h6M15 21v-8h6v8M2 21h20"/></svg></i><b>RANKS</b><small>${sub()}</small>`};draw();
+ b.onclick=()=>{try{AU.ui()}catch(e){}HUB.show('board')};R.appendChild(b);
+ // refresh the standings quietly if the cached list is old
+ const f=FO.st(),c=LB.cached(f.season);if(!c||Date.now()-c.t>120000)LB.list(f.season).then(()=>{if(b.isConnected)draw()}).catch(()=>{})}}
+{const st=document.createElement('style');st.textContent='.fab.lb-fab i{display:grid;place-items:center;height:20px}.fab.lb-fab small{color:#c9b88a}';document.head.appendChild(st)}
 // ---------- PATCH NOTES: what changed in each build. Add an entry at the top with every release. ----------
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:13,d:'2026-11-26',t:'Field Ops tidy-up',i:[
+  ['NEW','A RANKS button on the home screen shows your spot on the leaderboard and opens it in one tap.'],
+  ['CHANGE','The leaderboard button in Field Operations is easier to spot and shows where you stand.'],
+  ['CHANGE','The stakes rules moved into a short "How stakes work" sheet, so the Field Operations screen is less crowded.']]},
  {b:12,d:'2026-11-26',t:'New training',i:[
   ['CHANGE','Training is rebuilt from scratch. It walks you through your first few turns one step at a time, with the card or button you need lit up.'],
   ['CHANGE','Q now explains things plainly: lines and totals, face-up and face-down, covering, card text, compleating, refilling and END TURN.'],
