@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Compleat">
-<meta name="c75-build" content="19">
+<meta name="c75-build" content="20">
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:700;font-display:swap;src:url(fonts/oswald-latin-700-normal.woff2) format('woff2')}
@@ -6730,12 +6730,14 @@ const VXB={cache:new Map(),busy:new Set(),q:[],run:0,ims:new Map(),
    this.busy.delete(j[0]);setTimeout(step,0)};step()},
  img(src){if(!this.ims.has(src))this.ims.set(src,new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src}));return this.ims.get(src)},
  ver:'v4',
- async bake(k,kind,id,m,src){const ck='./__vxb/'+this.ver+'/'+encodeURIComponent(k);let C=null;try{C=await caches.open('vxb');const hit=await C.match(ck);if(hit)return URL.createObjectURL(await hit.blob())}catch(e){}
+ async bake(k,kind,id,m,src){const ck='./__vxb/'+this.ver+(/^glitch/.test(id)?'g':'')+'/'+encodeURIComponent(k);let C=null;try{C=await caches.open('vxb');const hit=await C.match(ck);if(hit)return URL.createObjectURL(await hit.blob())}catch(e){}
   const url=await this.bake0(k,kind,id,m,src);if(C&&url)try{const b=await fetch(url).then(r=>r.blob());await C.put(ck,new Response(b,{headers:{'content-type':b.type}}))}catch(e){}return url},
  async bake0(k,kind,id,m,src){const im=await this.img(src);const W=im.naturalWidth,H=im.naturalHeight,cv=document.createElement('canvas');cv.width=W;cv.height=H;
   const g=cv.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const T=(kind==='fin'?VXF:VXT)[id];
   try{await document.fonts.load('700 20px Oswald');await document.fonts.load('20px "Special Elite"')}catch(e){}
-  const png=await T(g,W,H,m,src)===true;return await new Promise(r=>cv.toBlob(b=>r(b?URL.createObjectURL(b):''),png?'image/png':'image/jpeg',.92))},
+  const png=await T(g,W,H,m,src)===true;
+  if(!png){let lit=0;for(let k=0;k<48;k++){const p=g.getImageData((W*(k%8+.5)/8)|0,(H*((k>>3)+.5)/6)|0,1,1).data;if(p[0]+p[1]+p[2]>18)lit++}if(lit<3)throw new Error('blank bake')}
+  return await new Promise(r=>cv.toBlob(b=>r(b?URL.createObjectURL(b):''),png?'image/png':'image/jpeg',.92))},
  apply(k,url){if(!url)return;for(const el of document.querySelectorAll('[data-vxk]'))if(el.dataset.vxk===k)this.set(el,url)},
  set(el,url){if(el.tagName==='IMG'){el.src=url;el.classList.add('vxb');const f=el.closest('.cd-in');if(f)f.style.setProperty('--vi',`url("${url}")`)}else{el.style.setProperty('--fm',`url("${url}")`);el.classList.add('vxb')}}};
 
@@ -6926,6 +6928,13 @@ const VXT={
   for(let y=0;y<h;y+=2)for(let x=0;x<w;x++){const i=(y*w+x)*4;d[i]*=.9;d[i+1]*=.9;d[i+2]*=.9}
   VXP.reink(d,o,M,w,h,m,{dark:'orig',light:'orig',restore:.82});g.putImageData(D,0,0)},
 
+ // Glitch, live tear frame: a few torn, colour-split strips of the art on a clear sheet. CSS shows it for a blink, using
+ // opacity only (filters, clip-paths and transforms on layers inside a card face can blank the card on some Android phones)
+ glitchT(g,w,h,m,src){const S=g.getImageData(0,0,w,h).data,O=g.createImageData(w,h),d=O.data,R=VXP.rng(VXP.hash(src)+77),sh=Math.round(w*.015);
+  for(let k=0;k<5;k++){const y0=(R()*h*.92)|0,bh=Math.max(3,(R()*h*.03)|0),dx=((R()-.5)*w*.16)|0;
+   for(let y=y0;y<Math.min(h,y0+bh);y++)for(let x=0;x<w;x++){const sx=Math.min(w-1,Math.max(0,x-dx)),i=(y*w+x)*4,s0=(y*w+sx)*4,sr=(y*w+Math.min(w-1,sx+sh))*4,sb=(y*w+Math.max(0,sx-sh))*4;d[i]=S[sr];d[i+1]=S[s0+1];d[i+2]=S[sb+2];d[i+3]=255}}
+  g.putImageData(O,0,0);return true},
+
  // Hologram: a security hologram. Silvered relief with diffraction colour that shifts across the surface and fine
  // interference lines; CSS moves the rainbow as the card tilts.
  holo(g,w,h,m,src){const D=g.getImageData(0,0,w,h),d=D.data,o=Uint8ClampedArray.from(d),n=w*h,G0=VXP.gray(d,n),M=VXP.glyphs(G0,w,h,m),G=VXP.levels(G0),Gb=VXP.blur(G,w,h,2),L=VXP.lut([[0,'#0e1422'],[.4,'#56627a'],[.75,'#bfcbe0'],[1,'#f7faff']]);
@@ -6999,7 +7008,8 @@ const vxMask=c=>(c.top?1:0)|(c.mid?2:0)|(c.bot?4:0);
 {const f0=faceHTML;faceHTML=function(c){let h=f0(c);const mm=h.match(/<img src="(art\/[^"]+\.jpg)"/);if(!mm)return h;const src=mm[1],m=vxMask(c);
   const VX=typeof varOf==='function'?varOf(c):'';
   if(VX&&VXT[VX]&&!(typeof SKIN!=='undefined'&&SKIN[VX])){const k=VXB.want('vx',VX,m,src),u=VXB.cache.get(k);
-   h=h.replace(mm[0],`<img src="${u||src}" data-vxk="${k}"${u?' class="vxb"':''}`);if(u)h=h.replace('class="cd-in face artc',`style="--vi:url('${u}')" class="cd-in face artc vxd`)}
+   h=h.replace(mm[0],`<img src="${u||src}" data-vxk="${k}"${u?' class="vxb"':''}`);if(u)h=h.replace('class="cd-in face artc',`style="--vi:url('${u}')" class="cd-in face artc vxd`)
+   if(VX==='glitch'){const kt=VXB.want('vx','glitchT',m,src),ut=VXB.cache.get(kt);h=h.replace(/<\/div>$/,`<i class="vxt${ut?' vxb':''}" data-vxk="${kt}"${ut?` style="--fm:url('${ut}')"`:''}></i></div>`)}}
   const fm=h.match(/<i class="finx fin-([a-z]+)"><\/i>/);
   if(fm&&VXF[fm[1]]){const k=VXB.want('fin',fm[1],m,src),u=VXB.cache.get(k);h=h.replace(fm[0],`<i class="finx fin-${fm[1]}${u?' vxb':''}" data-vxk="${k}"${u?` style="--fm:url('${u}')"`:''}></i>`)}
   return h}}
@@ -7013,14 +7023,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @keyframes vxsw{0%{background-position:100% 0}60%,100%{background-position:0 0}}
 .vxd.vx-holo::before{background:linear-gradient(115deg,#ff4a8a,#ffd23a,#4ae0a0,#3ab0ff,#b46cf0,#ff4a8a,#ffd23a) var(--mx,50%) var(--my,50%)/320% 320%;mix-blend-mode:color-dodge;opacity:.42;animation:vxholo 7s linear infinite}
 @keyframes vxholo{to{background-position:100% 100%}}
-.vxd.vx-glitch::before,.vxd.vx-glitch::after{content:"";position:absolute;inset:0;z-index:1;background:var(--vi) center/100% 100%;mix-blend-mode:normal;opacity:0;animation:vxgl 2.8s steps(1) infinite}
-.vxd.vx-glitch::after{animation:vxgl2 3.7s steps(1) infinite}
-@keyframes vxgl{0%,86%,100%{opacity:0}87%{opacity:1;clip-path:inset(22% 0 70% 0);transform:translateX(5%)}90%{opacity:1;clip-path:inset(61% 0 31% 0);transform:translateX(-7%);filter:hue-rotate(90deg)}93%{opacity:1;clip-path:inset(8% 0 88% 0);transform:translateX(3%)}}
-@keyframes vxgl2{0%,70%,100%{opacity:0}71%{opacity:1;clip-path:inset(44% 0 50% 0);transform:translateX(-4%)}73%{opacity:1;clip-path:inset(80% 0 14% 0);transform:translateX(6%);filter:invert(1)}}
+.vx-glitch img,.vx-glitch .art{animation:none!important}
+.vx-glitch .vxt{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:var(--fm) center/100% 100% no-repeat}
+.vxd.vx-glitch .vxt.vxb{animation:vxgt 2.8s steps(1) infinite}
+@keyframes vxgt{0%,86%,100%{opacity:0;background-position:0 0}87%{opacity:1}89%{opacity:0}91%{opacity:1;background-position:2.5% 0}92%{opacity:0}}
 .vxd.vx-nightvision::before{background:radial-gradient(circle at 50% 50%,rgba(120,255,120,.16),transparent 70%);mix-blend-mode:screen;animation:vxnv .18s steps(2) infinite}
 @keyframes vxnv{50%{opacity:.55}}
 .lite .vxd::before,.lite .vxd::after{animation:none!important}
-.lite .vxd.vx-glitch::before,.lite .vxd.vx-glitch::after{content:none!important}
+.lite .vx-glitch .vxt{display:none}
 </style>`);
 
 // ---------- MAJESTIC finish styling (baked overlays) and the MAJESTIC frame ----------
@@ -7662,9 +7672,11 @@ const TTL={
   for(let j=0,i=3;j<w*h;j++,i+=4){if(!d[i])continue;const k=F[j];if(k<.28*wear+.1||R()<.05*wear)d[i]*=k*.6}g.globalCompositeOperation='source-over';g.putImageData(D,0,0);return c},
  // the shared start: unlock audio, fade out, then whatever the old title did next
  wire(o,btn,stop,sound){const unlock=()=>{AU.init();try{AU.ctx&&AU.ctx.resume&&AU.ctx.resume()}catch(e){}};o.addEventListener('pointerdown',unlock,{once:true,capture:true});
-  btn.onclick=()=>{unlock();AU.ui();try{sound&&sound()}catch(e){}const go=()=>{stop();o.remove();if(OB.st().complete){if(typeof MUS!=='undefined')MUS.play('ambient');HUB.show('home')}else PRG.resume()};
+  btn.onclick=()=>{unlock();AU.ui();try{sound&&sound()}catch(e){}const go=()=>{stop();o.remove();if(OB.st().complete){if(typeof MUS!=='undefined')MUS.play('ambient');HUB.show('home')}else PRG.resume();const bk=$('ttBack');if(bk)requestAnimationFrame(()=>requestAnimationFrame(()=>bk.remove()))};
    if(this.rm()){go();return}o.animate([{opacity:1},{opacity:0}],{duration:520,fill:'forwards'}).onfinish=go}},
  async show(v,prog){PS.stopAll();const o=document.createElement('div');o.id='splash';o.className='pro-title tt tt'+v;$('app').appendChild(o);
+  // a solid black layer under the title, so its fade in and out never shows the table underneath
+  {const ob=$('ttBack');if(ob)ob.remove();const bk=document.createElement('div');bk.id='ttBack';bk.style.cssText='position:fixed;inset:0;background:#000;pointer-events:none';$('app').insertBefore(bk,o);const z=getComputedStyle(o).zIndex;if(z&&z!=='auto')bk.style.zIndex=z}
   const W=Math.min(innerWidth,520),H=innerHeight,dpr=Math.min(1.5,devicePixelRatio||1);try{await document.fonts.load('700 40px Oswald');await document.fonts.load('20px "Special Elite"');await document.fonts.load('20px "Share Tech Mono"')}catch(e){}
   return this['d'+v](o,W,H,dpr,prog?'CONTINUE':'START')},
 
@@ -7783,7 +7795,7 @@ const TTL={
    setTimeout(()=>{burst();o.animate([{transform:'translate(0,0)'},{transform:'translate(5px,-4px)'},{transform:'translate(-4px,3px)'},{transform:'translate(2px,-1px)'},{transform:'none'}],{duration:260});this.snd(d=>{AU.nz(d,{type:'lowpass',f:400,f2:60,dur:.5,g:.7});AU.nz(d,{type:'highpass',f:2500,dur:.25,g:.2})})},1130);
    b.animate([{opacity:0},{opacity:1}],{duration:500,delay:1700,fill:'backwards'})}else lg.style.transform='rotate(-4deg)';
   this.wire(o,b.querySelector('#ptGo'),()=>cancelAnimationFrame(raf),()=>this.snd(d=>{AU.nz(d,{type:'lowpass',f:300,dur:.2,g:.5});AU.osc(d,{type:'sawtooth',f:196,dur:.35,g:.04})}))}};
-{const t0=PRG.title.bind(PRG);PRG.title=function(){const v=TTL.pick();if(v>=1&&v<=9){const s=OB.st();const prog=s.complete||s.stage!=='title'||PROF.d.stats&&PROF.d.stats.games>0;TTL.show(v,prog).catch(e=>{console.warn('title',e);const x=$('splash');if(x)x.remove();t0()});return}return t0()}}
+{const t0=PRG.title.bind(PRG);PRG.title=function(){const v=TTL.pick();if(v>=1&&v<=9){const s=OB.st();const prog=s.complete||s.stage!=='title'||PROF.d.stats&&PROF.d.stats.games>0;TTL.show(v,prog).catch(e=>{console.warn('title',e);const x=$('splash');if(x)x.remove();const bk=$('ttBack');if(bk)bk.remove();t0()});return}return t0()}}
 document.head.insertAdjacentHTML('beforeend',`<style>
 .tt{overflow:hidden;background:#000!important;display:block!important}.pro-title.tt>*{position:absolute;display:block}.pro-title.tt>.tt-b{display:flex}.tt-bg,.tt-fx{inset:0;width:100%;height:100%}.tt-fx{pointer-events:none}
 .tt-b{left:0;right:0;bottom:calc(6% + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:10px}.tt-b small{font:600 11px "Share Tech Mono",monospace;letter-spacing:.3em;color:rgba(255,230,190,.7)}
@@ -8155,6 +8167,9 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // After an update the game opens the notes for every build the player hasn't seen yet. They're also on the home screen
 // and in Settings.
 const CLOG=[
+ {b:20,d:'2026-11-27',t:'Fixes',i:[
+  ['FIX','The title screens no longer show part of the game table while they fade in and out.'],
+  ['FIX','Cards with the Glitch variant no longer go blank or half-drawn on some phones. The glitch tear is rebuilt to be lighter.']]},
  {b:19,d:'2026-11-27',t:'Rotating title screens',i:[
   ['NEW','Nine new title screens, and you get a different one every time you open the game: the case file, the radar console, the Iron Curtain poster, the punch card, the Daily Signal, the orders board, the Hoboken payphone, the case wall and the monitor tape deck.'],
   ['NEW','The title screens follow your story. They show your codename, your sector and your current orders from Q, and the case wall pins up the contacts you\'re chasing.'],
